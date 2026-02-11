@@ -1,0 +1,30 @@
+name: Generate Daily Puzzle
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: "0 0 * * *"
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call generate-daily-puzzle endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          APP_URL: ${{ vars.POKER_WORDLE_APP_URL || 'https://poker-wordle.vercel.app' }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET not set - skipping (add to GitHub Secrets for scheduled runs)"
+            exit 0
+          fi
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            "${APP_URL}/api/cron/generate-daily-puzzle" \
+            -H "Authorization: Bearer ${CRON_SECRET}")
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "Response ($http_code): $body"
+          if [ "$http_code" -ge 400 ]; then
+            exit 1
+          fi
