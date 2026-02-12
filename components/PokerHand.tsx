@@ -32,9 +32,13 @@ export function PokerHand({
   size = "normal",
 }: PokerHandProps) {
   const isLarge = size === "large";
+  const stackedLayout = showPercent && (showFeedbackEmoji || feedback);
+
   return (
     <div
-      className={`flex items-center gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 rounded-lg border ${
+      className={`flex gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 rounded-lg border ${
+        stackedLayout ? "flex-col items-center" : "items-center"
+      } ${
         isLarge ? "min-w-[200px] sm:min-w-[260px] lg:min-w-[320px]" : ""
       } ${isLarge && !showPercent ? "justify-center" : ""} ${
         feedback ? feedbackColors[feedback] : "bg-[#f6f7f8] border-[#d3d6da]"
@@ -53,7 +57,7 @@ export function PokerHand({
         ))}
       </div>
       {showPercent && (
-        <div className="ml-auto font-semibold flex flex-col items-center flex-shrink-0 min-w-[4ch]">
+        <div className={`font-semibold flex-shrink-0 min-w-[4ch] ${stackedLayout ? "flex flex-row items-center justify-center gap-1" : "ml-auto flex flex-col items-center"}`}>
           {guessedPercent !== undefined && (
             <span>{guessedPercent}%</span>
           )}
@@ -66,7 +70,7 @@ export function PokerHand({
             </span>
           )}
           {actualPercent !== undefined && guessedPercent !== actualPercent && (
-            <span className="opacity-80 text-xs sm:text-sm mt-0.5">
+            <span className={`opacity-80 text-xs sm:text-sm ${stackedLayout ? "" : "mt-0.5"}`}>
               (actual: {actualPercent}%)
             </span>
           )}

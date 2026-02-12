@@ -446,7 +446,7 @@ function GameContent() {
                 Previous Guesses:
               </p>
               <div className="space-y-2 sm:space-y-3">
-                {puzzle.userGuess.guessHistory.map((attempt) => {
+                {[...puzzle.userGuess.guessHistory].reverse().map((attempt) => {
                   const sorted = [...attempt.guesses].sort(
                     (a, b) => b.percent - a.percent
                   );
