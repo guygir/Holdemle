@@ -15,8 +15,8 @@ interface GuessAttempt {
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `${s}s`;
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 interface ResultsDisplayProps {
@@ -43,9 +43,9 @@ export function ResultsDisplay({
   const getPercent = (a: { position: number; percent?: number; actualPercent?: number }) =>
     a.percent ?? (a as { actualPercent?: number }).actualPercent ?? 0;
 
-  const sortedActual = [...actualPercentages]
+  const byPositionActual = [...actualPercentages]
     .map((a) => ({ ...a, percent: getPercent(a) }))
-    .sort((a, b) => b.percent - a.percent);
+    .sort((a, b) => a.position - b.position);
 
   return (
     <div className="space-y-2 sm:space-y-4 w-full max-w-full min-w-0">
@@ -82,7 +82,7 @@ export function ResultsDisplay({
           Correct:
         </p>
         <div className="grid grid-cols-4 gap-1 sm:gap-2">
-          {sortedActual.map((a) => {
+          {byPositionActual.map((a) => {
             const hand = hands.find((h) => h.position === a.position);
             if (!hand) return null;
             const lastAttempt = guessHistory[guessHistory.length - 1];
@@ -96,15 +96,15 @@ export function ResultsDisplay({
             return (
               <div
                 key={a.position}
-                className={`flex flex-col items-center gap-0.5 p-1.5 sm:p-2 rounded-lg border min-w-0 ${
+                className={`flex flex-col items-center gap-1 p-2 sm:p-3 lg:p-4 rounded-lg border min-w-0 ${
                   isCorrect ? "bg-[#6aaa64] border-[#5a9a54] text-white" : "bg-[#dc2626] border-[#b91c1c] text-white"
                 }`}
               >
-                <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+                <div className="flex gap-0.5 sm:gap-1 lg:gap-2 flex-shrink-0">
                   {hand.cards.map((card) => (
                     <div
                       key={card}
-                      className={`w-6 h-8 sm:w-8 sm:h-11 lg:w-10 lg:h-14 rounded flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold bg-white border border-[#d3d6da] ${
+                      className={`w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-xs sm:text-sm lg:text-base font-bold bg-white border border-[#d3d6da] ${
                         isRedSuit(card) ? "text-red-600" : "text-black"
                       }`}
                     >
@@ -112,11 +112,13 @@ export function ResultsDisplay({
                     </div>
                   ))}
                 </div>
-                <div className="shrink-0 text-center flex flex-col items-center">
-                  <span className="font-bold text-white text-[10px] sm:text-xs">
+                <div className="shrink-0 text-center flex flex-row items-center justify-center gap-1 font-semibold text-sm sm:text-base lg:text-lg">
+                  <span className="font-bold text-white">
                     {actual}%
                   </span>
-                  {diff > 0 && (
+                  {isCorrect ? (
+                    <span className="text-sm sm:text-base text-white">✓</span>
+                  ) : (
                     <span className="text-[9px] sm:text-[10px] font-semibold text-white">
                       (Δ{diff}%)
                     </span>
@@ -131,8 +133,8 @@ export function ResultsDisplay({
       {/* Guesses - newest on TOP (reverse order) */}
       <div className="space-y-2 sm:space-y-3">
         {[...guessHistory].reverse().map((attempt) => {
-          const sorted = [...attempt.guesses].sort(
-            (a, b) => b.percent - a.percent
+          const byPosition = [...attempt.guesses].sort(
+            (a, b) => a.position - b.position
           );
           return (
             <div key={attempt.attempt} className="flex flex-col gap-1">
@@ -140,7 +142,7 @@ export function ResultsDisplay({
                 Guess {attempt.attempt}:
               </p>
               <div className="grid grid-cols-4 gap-1 sm:gap-2">
-                {sorted.map((g) => {
+                {byPosition.map((g) => {
                   const hand = hands.find((h) => h.position === g.position);
                   if (!hand) return null;
                   return (

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Poker Wordle - Daily Poker Puzzle",
+  title: "Hold'emle - Texas Hold'em Daily Puzzle",
   description: "Guess the pre-flop odds daily! A daily poker puzzle game inspired by Wordle.",
 };
 

@@ -6,8 +6,8 @@ import { MAX_GUESSES } from "@/lib/game-config";
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `${s}s`;
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 interface StatsData {
@@ -52,7 +52,7 @@ export default function StatsPage() {
       <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
       <header className="flex justify-between items-center mb-3 sm:mb-6 min-h-9 sm:min-h-11">
         <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
-          🃏 Poker Wordle
+          🃏 Hold&apos;emle 🃏
         </Link>
         <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
           ← Back
@@ -92,36 +92,66 @@ export default function StatsPage() {
 
           <div>
             <h2 className="font-semibold mb-2">Solved In</h2>
-            <div className="flex gap-4 text-sm lg:text-base flex-wrap">
-              {Array.from({ length: MAX_GUESSES }, (_, i) => i + 1).map(
-                (n) => (
-                  <span key={n}>
-                    {n} guess{n > 1 ? "es" : ""}:{" "}
-                    {(stats.solvedDistribution ?? {})[String(n)] ?? 0}
-                  </span>
-                )
-              )}
-              <span className="text-gray-500">Failed: {stats.failedGames}</span>
+            <div className="flex items-end gap-1 sm:gap-2" style={{ minHeight: "80px" }}>
+              {(() => {
+                const dist = stats.solvedDistribution ?? {};
+                const failed = stats.failedGames ?? 0;
+                const counts = Array.from({ length: MAX_GUESSES }, (_, i) => dist[String(i + 1)] ?? 0);
+                const maxCount = Math.max(...counts, failed, 1);
+                return (
+                  <>
+                    {Array.from({ length: MAX_GUESSES }, (_, i) => {
+                      const n = i + 1;
+                      const count = counts[i];
+                      const h = maxCount > 0 ? Math.max(8, (count / maxCount) * 48) : 0;
+                      return (
+                        <div key={n} className="flex flex-col items-center flex-1">
+                          <span className="text-[10px] sm:text-xs mb-0.5 font-medium">{count}</span>
+                          <div
+                            className="w-full rounded-t bg-[#6aaa64] min-h-[4px]"
+                            style={{ height: `${h}px` }}
+                            title={`${n} guess${n > 1 ? "es" : ""}: ${count}`}
+                          />
+                          <span className="text-[10px] sm:text-xs mt-1">{n}</span>
+                        </div>
+                      );
+                    })}
+                    <div className="flex flex-col items-center flex-1">
+                      <span className="text-[10px] sm:text-xs mb-0.5 font-medium">{failed}</span>
+                      <div
+                        className="w-full rounded-t bg-[#dc2626] min-h-[4px]"
+                        style={{
+                          height: `${maxCount > 0 ? Math.max(8, (failed / maxCount) * 48) : 0}px`,
+                        }}
+                        title={`Failed: ${failed}`}
+                      />
+                      <span className="text-[10px] sm:text-xs mt-1">Failed</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 
-          {stats.averagePercentDiff > 0 && (
-            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff (lower = better)</p>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
-                {stats.averagePercentDiff.toFixed(1)}
-              </p>
-            </div>
-          )}
+          <div className="space-y-2">
+            {stats.averagePercentDiff > 0 && (
+              <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+                  {stats.averagePercentDiff.toFixed(1)}
+                </p>
+              </div>
+            )}
 
-          {stats.totalGames > 0 && (
-            <div>
-              <p className="text-sm lg:text-base text-gray-600">
-                Average guesses to solve:{" "}
-                {stats.averageGuesses.toFixed(1)}
-              </p>
-            </div>
-          )}
+            {stats.totalGames > 0 && (
+              <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Average guesses to solve</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+                  {stats.averageGuesses.toFixed(1)}
+                </p>
+              </div>
+            )}
+          </div>
 
           {stats.recentGames.length > 0 && (
             <div>
@@ -130,29 +160,12 @@ export default function StatsPage() {
                 {stats.recentGames.map((g, i) => (
                   <div
                     key={i}
-                    className="p-3 bg-[#f6f7f8] rounded-lg flex flex-col gap-1"
+                    className="p-3 bg-[#f6f7f8] rounded-lg flex flex-col gap-0.5"
                   >
-                    <div className="flex flex-wrap gap-x-2 gap-y-1 text-sm lg:text-base">
-                      <span className="font-medium">
-                        {g.isSolved ? (
-                          <span className="text-[#6aaa64]">Won</span>
-                        ) : (
-                          <span className="text-gray-500">Failed</span>
-                        )}
-                      </span>
-                      <span className="text-gray-600">
-                        {g.guessesUsed}/{MAX_GUESSES} guesses
-                      </span>
-                      <span className="text-gray-600">
-                        {formatTime(g.timeInSeconds)}
-                      </span>
-                      {g.percentDiff > 0 && (
-                        <span className="text-gray-600">
-                          Δ{g.percentDiff.toFixed(0)}%
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-sm lg:text-base text-gray-500">{g.date}</span>
+                    <p className="text-sm lg:text-base font-medium">
+                      {g.isSolved ? "Won" : "Failed"}, Guesses: {g.guessesUsed}/{MAX_GUESSES}, Time: {formatTime(g.timeInSeconds)}, Diff: Δ{g.percentDiff.toFixed(0)}%
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-500">{g.date}</p>
                   </div>
                 ))}
               </div>

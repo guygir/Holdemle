@@ -20,7 +20,7 @@ describe("formatShareText", () => {
       true,
       1
     );
-    expect(text).toContain("Poker Wordle");
+    expect(text).toContain("Hold'emle");
     expect(text).toContain("2026-02-11");
     expect(text).toContain(`1/${MAX_GUESSES}`);
     expect(text).toContain("✓");

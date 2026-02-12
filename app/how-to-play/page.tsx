@@ -7,7 +7,7 @@ export default function HowToPlayPage() {
       <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
       <header className="flex justify-between items-center mb-3 sm:mb-6 min-h-9 sm:min-h-11">
         <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
-          🃏 Poker Wordle
+          🃏 Hold&apos;emle 🃏
         </Link>
         <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
           ← Back

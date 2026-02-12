@@ -20,7 +20,7 @@ interface GuessAttempt {
 /**
  * Format results as Wordle-style share text.
  * Example:
- *   Poker Wordle 2026-02-11 2/3 ✓
+ *   Hold'emle 2026-02-11 2/3 ✓
  *   🟦🟩🟨🟨
  *   🟩🟩🟩🟩
  */
@@ -32,7 +32,7 @@ export function formatShareText(
 ): string {
   const lines: string[] = [];
   lines.push(
-    `Poker Wordle ${date} ${guessesUsed}/${MAX_GUESSES} ${isSolved ? "✓" : "✗"}`
+    `Hold'emle ${date} ${guessesUsed}/${MAX_GUESSES} ${isSolved ? "✓" : "✗"}`
   );
 
   const orderedPositions = [1, 2, 3, 4];
@@ -45,6 +45,10 @@ export function formatShareText(
       .join("");
     lines.push(emojiRow);
   }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://holdemle.vercel.app";
+  lines.push("");
+  lines.push(`Visit ${appUrl}/ for daily poker puzzles!`);
 
   return lines.join("\n");
 }

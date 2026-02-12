@@ -47,7 +47,7 @@ function LoginForm() {
         <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-6">
           {redirectTo === "/game"
             ? "Sign in to play today's puzzle"
-            : "Login to Poker Wordle"}
+            : "Login to Hold'emle"}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

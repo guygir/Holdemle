@@ -48,7 +48,7 @@ export function ShareButton({
   return (
     <button
       onClick={handleShare}
-      className={`py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg font-medium text-xs sm:text-base lg:text-lg transition-colors border border-[#d3d6da] ${
+      className={`py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg font-medium text-sm sm:text-base lg:text-xl transition-colors border border-[#d3d6da] ${
         copied ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] text-[#1a1a1b] hover:bg-[#e8e9eb]"
       } ${className}`}
     >

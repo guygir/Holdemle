@@ -72,10 +72,15 @@ function GameContent() {
         const data = json.data;
         setPuzzle(data);
         const prevGuess = data.userGuess;
+        const lastAttempt = prevGuess?.guessHistory?.[prevGuess.guessHistory.length - 1];
         setGuesses(
-          Object.fromEntries(
-            (data.hands as Hand[]).map((h) => [h.position, 0])
-          )
+          lastAttempt
+            ? Object.fromEntries(
+                lastAttempt.guesses.map((g: { position: number; percent: number }) => [g.position, g.percent])
+              )
+            : Object.fromEntries(
+                (data.hands as Hand[]).map((h) => [h.position, 25])
+              )
         );
         if (prevGuess?.pausedElapsedSeconds != null && prevGuess.pausedElapsedSeconds > 0) {
           setStartTime(Date.now() - prevGuess.pausedElapsedSeconds * 1000);
@@ -261,11 +266,8 @@ function GameContent() {
             </p>
           </>
         )}
-        <Link
-          href="/"
-          className="py-2 px-4 bg-[#6aaa64] text-white rounded-lg"
-        >
-          Back to Home
+        <Link href="/" className="mt-4 text-gray-600 hover:text-[#1a1a1b] text-sm">
+          ← Back
         </Link>
       </main>
     );
@@ -335,7 +337,7 @@ function GameContent() {
       <header className="flex flex-col gap-0.5 mb-3 sm:mb-6">
         <div className="flex justify-between items-center min-h-9 sm:min-h-11">
           <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
-            🃏 Poker Wordle
+            🃏 Hold&apos;emle 🃏
           </Link>
           <span className="text-xs sm:text-base lg:text-xl text-gray-600">
           {isDemoMode ? (
@@ -369,13 +371,13 @@ function GameContent() {
               date={puzzle.date}
               isSolved={puzzle.userGuess.isSolved}
               guessesUsed={puzzle.userGuess.guessesUsed}
-              className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 hover:bg-[#e8e9eb]"
+              className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl font-medium px-3 sm:px-4 rounded-lg border border-[#d3d6da] hover:bg-[#e8e9eb]"
             />
-            {isDemoMode ? (
+            {isDemoMode && (
               <div className="flex-1 flex flex-col gap-2">
                 <Link
                   href="/game"
-                  className="min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 bg-[#6aaa64] text-white rounded-lg font-medium hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl font-medium px-3 sm:px-4 bg-[#6aaa64] text-white rounded-lg hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Play for Real
                 </Link>
@@ -383,13 +385,6 @@ function GameContent() {
                   Sign up to play daily puzzles and save your scores
                 </p>
               </div>
-            ) : (
-              <Link
-                href="/"
-                className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 bg-[#f6f7f8] border border-[#d3d6da] rounded-lg font-medium hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
-              >
-                Back to Home
-              </Link>
             )}
           </div>
         </div>
@@ -402,6 +397,9 @@ function GameContent() {
           </div>
 
           <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 text-center mb-1">
+              Guess each hand&apos;s preflop equity (%)
+            </p>
             {puzzle.hands.map((hand) => (
               <div key={hand.position} className="flex items-center gap-1.5 sm:gap-3 justify-center">
                 <div className="flex-initial max-w-[280px] sm:max-w-[360px]">
@@ -411,22 +409,50 @@ function GameContent() {
                     size="large"
                   />
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = guesses[hand.position] ?? 25;
+                      setGuesses((g) => ({
+                        ...g,
+                        [hand.position]: Math.max(0, v - 1),
+                      }));
+                    }}
+                    className="p-0.5 sm:p-1 min-w-[24px] min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-l bg-[#f6f7f8] hover:bg-[#e8e9eb] text-[10px] sm:text-xs [touch-action:manipulation]"
+                    aria-label="Decrease by 1"
+                  >
+                    ↓
+                  </button>
                   <input
                     type="number"
                     min={0}
                     max={100}
-                    value={guesses[hand.position] || ""}
+                    value={guesses[hand.position] ?? ""}
                     onChange={(e) => {
                       const v = parseInt(e.target.value, 10);
                       setGuesses((g) => ({
                         ...g,
-                        [hand.position]: isNaN(v) ? 0 : Math.min(100, Math.max(0, v)),
+                        [hand.position]: isNaN(v) ? 25 : Math.min(100, Math.max(0, v)),
                       }));
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                    className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border border-[#d3d6da] rounded text-center font-semibold [touch-action:manipulation]"
+                    className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border-y border-[#d3d6da] border-x-0 font-semibold [touch-action:manipulation] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = guesses[hand.position] ?? 25;
+                      setGuesses((g) => ({
+                        ...g,
+                        [hand.position]: Math.min(100, v + 1),
+                      }));
+                    }}
+                    className="p-0.5 sm:p-1 min-w-[24px] min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-r bg-[#f6f7f8] hover:bg-[#e8e9eb] text-[10px] sm:text-xs [touch-action:manipulation]"
+                    aria-label="Increase by 1"
+                  >
+                    ↑
+                  </button>
                   <span className="text-sm sm:text-base lg:text-xl">%</span>
                 </div>
               </div>
@@ -461,8 +487,8 @@ function GameContent() {
               </p>
               <div className="space-y-2 sm:space-y-3">
                 {[...puzzle.userGuess.guessHistory].reverse().map((attempt) => {
-                  const sorted = [...attempt.guesses].sort(
-                    (a, b) => b.percent - a.percent
+                  const byPosition = [...attempt.guesses].sort(
+                    (a, b) => a.position - b.position
                   );
                   return (
                     <div key={attempt.attempt} className="flex flex-col gap-1">
@@ -470,7 +496,7 @@ function GameContent() {
                         Guess {attempt.attempt}:
                       </p>
                       <div className="grid grid-cols-4 gap-1 sm:gap-2">
-                        {sorted.map((g) => {
+                        {byPosition.map((g) => {
                           const hand = puzzle.hands.find(
                             (h) => h.position === g.position
                           );
