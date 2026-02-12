@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Larger base font size - scales all text for readability */
+html {
+  font-size: 137.5%; /* ~22px base (was 16px) */
+}
+
 :root {
   --color-exact: #6aaa64;
   --color-high: #85c0f9;

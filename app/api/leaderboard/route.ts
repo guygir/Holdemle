@@ -79,16 +79,28 @@ export async function GET(request: NextRequest) {
       })
       .slice(0, limit);
 
-    const entries = sorted.map((s, i) => ({
-      rank: i + 1,
-      userId: s.user_id,
-      username: `Player ${String(s.user_id).slice(0, 8)}`,
-      wins: getWins(s),
-      totalGames: s.total_games,
-      averageGuesses: getAvgGuesses(s),
-      averagePercentDiff: parseFloat(String(s.average_percent_diff ?? 0)),
-      totalScore: s.total_score,
-    }));
+    const userIds = sorted.map((s) => s.user_id);
+    const { data: profiles } = userIds.length
+      ? await adminSupabase.from("profiles").select("user_id, nickname, email").in("user_id", userIds)
+      : { data: [] };
+    const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+
+    const entries = sorted.map((s, i) => {
+      const p = profileMap.get(s.user_id);
+      const displayName = p
+        ? `${p.nickname}${p.email ? ` (${p.email})` : ""}`
+        : `Player ${String(s.user_id).slice(0, 8)}`;
+      return {
+        rank: i + 1,
+        userId: s.user_id,
+        username: displayName,
+        wins: getWins(s),
+        totalGames: s.total_games,
+        averageGuesses: getAvgGuesses(s),
+        averagePercentDiff: parseFloat(String(s.average_percent_diff ?? 0)),
+        totalScore: s.total_score,
+      };
+    });
 
     const fullSorted = (stats ?? []).filter((s) => (s.total_games ?? 0) > 0)
       .sort((a, b) => {
@@ -136,19 +148,31 @@ export async function GET(request: NextRequest) {
     .select("user_id, is_solved, guesses_used, time_taken_seconds, percent_diff, submitted_at")
     .eq("puzzle_id", puzzle.id);
 
-  const sorted = sortDailyLeaderboard(guesses ?? []);
+  const completed = (guesses ?? []).filter((g) => g.guesses_used > 0);
+  const sorted = sortDailyLeaderboard(completed);
   const limited = sorted.slice(0, limit);
+  const userIds = limited.map((g) => g.user_id);
+  const { data: profiles } = userIds.length
+    ? await adminSupabase.from("profiles").select("user_id, nickname, email").in("user_id", userIds)
+    : { data: [] };
+  const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
-  const entries = limited.map((g, i) => ({
-    rank: i + 1,
-    userId: g.user_id,
-    username: `Player ${String(g.user_id).slice(0, 8)}`,
-    isSolved: g.is_solved,
-    guessesUsed: g.guesses_used,
-    timeInSeconds: g.time_taken_seconds,
-    percentDiff: g.percent_diff ?? 0,
-    submittedAt: g.submitted_at,
-  }));
+  const entries = limited.map((g, i) => {
+    const p = profileMap.get(g.user_id);
+    const displayName = p
+      ? `${p.nickname}${p.email ? ` (${p.email})` : ""}`
+      : `Player ${String(g.user_id).slice(0, 8)}`;
+    return {
+      rank: i + 1,
+      userId: g.user_id,
+      username: displayName,
+      isSolved: g.is_solved,
+      guessesUsed: g.guesses_used,
+      timeInSeconds: g.time_taken_seconds,
+      percentDiff: g.percent_diff ?? 0,
+      submittedAt: g.submitted_at,
+    };
+  });
 
   const userRank = user
     ? (sorted.findIndex((g) => g.user_id === user.id) + 1) || undefined

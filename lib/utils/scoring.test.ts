@@ -1,32 +1,34 @@
 import { describe, it, expect } from "vitest";
 import { calculateScore } from "./scoring";
+import { getBaseScore, MAX_GUESSES } from "@/lib/game-config";
 
 describe("calculateScore", () => {
-  it("gives 300+ base for 1 guess", () => {
+  it("gives max base for 1 guess", () => {
     const score = calculateScore(1, 0);
-    expect(score).toBeGreaterThanOrEqual(300);
-    expect(score).toBeLessThanOrEqual(400);
+    expect(score).toBeGreaterThanOrEqual(getBaseScore(1));
+    expect(score).toBeLessThanOrEqual(getBaseScore(1) + 100);
   });
 
-  it("gives 200+ base for 2 guesses", () => {
+  it("gives expected base for 2 guesses", () => {
     const score = calculateScore(2, 0);
-    expect(score).toBeGreaterThanOrEqual(200);
+    expect(score).toBeGreaterThanOrEqual(getBaseScore(2));
   });
 
-  it("gives 100+ base for 3 guesses", () => {
-    const score = calculateScore(3, 0);
-    expect(score).toBeGreaterThanOrEqual(100);
+  it("gives min base for last guess", () => {
+    const score = calculateScore(MAX_GUESSES, 0);
+    expect(score).toBeGreaterThanOrEqual(getBaseScore(MAX_GUESSES));
   });
 
   it("time bonus decays over 5 minutes", () => {
     const scoreAt0 = calculateScore(1, 0);
     const scoreAt300 = calculateScore(1, 300);
     expect(scoreAt0).toBeGreaterThan(scoreAt300);
-    expect(scoreAt300).toBe(300); // base 300 + 0 time bonus
+    expect(scoreAt300).toBe(getBaseScore(1)); // base + 0 time bonus at 300s
   });
 
   it("returns base + time bonus for typical case", () => {
     const score = calculateScore(2, 60);
-    expect(score).toBe(200 + Math.max(0, Math.floor(100 - 60 / 3)));
+    const timeBonus = Math.max(0, Math.floor(100 - 60 / 3));
+    expect(score).toBe(getBaseScore(2) + timeBonus);
   });
 });

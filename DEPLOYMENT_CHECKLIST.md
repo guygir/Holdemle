@@ -26,6 +26,10 @@ Run in order:
 1. `supabase/migrations/001_initial_schema.sql`
 2. `supabase/migrations/002_leaderboard_metrics.sql`
 3. `supabase/migrations/003_solved_distribution_jsonb.sql`
+4. `supabase/migrations/004_profiles.sql` (nicknames, leaderboard display)
+5. `supabase/migrations/005_game_started_at.sql` (timer restoration)
+6. `supabase/migrations/006_guesses_update_policy.sql` (persist guesses on submit)
+7. `supabase/migrations/007_paused_elapsed.sql` (timer pauses when leaving page)
 
 ### 1.4 Generate puzzles (local)
 Create `.env.local` in `poker-wordle/`:
@@ -116,6 +120,7 @@ Do **not** set `NEXT_PUBLIC_USE_DEMO_PUZZLE` in prod – app uses Supabase.
 Add to **Redirect URLs**:
 - `https://your-project.vercel.app/**`
 - `https://your-project-*.vercel.app/**` (for preview deployments)
+- `http://localhost:3000/**` (for local testing)
 
 ### 4.2 (Optional) Set Site URL
 **Where:** Same page
@@ -154,8 +159,20 @@ Check that it runs and returns success.
 
 ---
 
+## Testing (no email verification)
+
+To use email/password sign-in without email confirmation:
+
+- Supabase Dashboard → **Authentication** → **Providers** → **Email**
+- Turn **OFF** "Confirm email"
+- Sign up works immediately; users can log in right after creating an account (no confirmation link needed)
+
+---
+
 ## Troubleshooting
 
 - **503 "Supabase not configured"** → Check Vercel env vars; redeploy after adding.
 - **Auth redirect fails** → Add Vercel URL to Supabase redirect URLs.
 - **Cron fails** → Ensure `CRON_SECRET` matches in Vercel and GitHub; check `POKER_WORDLE_APP_URL` if not default.
+- **Guesses / game-over reset when returning** → Run migration 006 (guesses UPDATE policy). Without it, submits after guess 1 fail silently.
+- **In all-time but not today's leaderboard** → "Today" uses UTC. Ensure a puzzle exists for today's UTC date (run generate-puzzles). Add `http://localhost:3000` to Supabase **Authentication → URL Configuration → Redirect URLs** when testing locally.

@@ -3,7 +3,7 @@ import { MAX_GUESSES } from "@/lib/game-config";
 const EMOJI = {
   exact: "🟩",
   high: "🟦",
-  low: "🟨",
+  low: "🟧", // orange, matches site #f5793a
 } as const;
 
 interface GuessWithFeedback {

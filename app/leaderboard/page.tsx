@@ -56,17 +56,17 @@ export default function LeaderboardPage() {
   }, [type]);
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 max-w-lg mx-auto">
+    <main className="min-h-screen p-4 sm:p-6 max-w-lg lg:max-w-5xl xl:max-w-6xl 2xl:max-w-screen-2xl mx-auto">
       <header className="flex justify-between items-center mb-6 min-h-11">
-        <Link href="/" className="text-lg font-bold text-[#1a1a1b] py-2 -my-2 min-h-[44px] flex items-center">
+        <Link href="/" className="text-lg lg:text-xl font-bold text-[#1a1a1b] py-2 -my-2 min-h-[44px] flex items-center">
           🃏 Poker Wordle
         </Link>
-        <Link href="/game" className="text-sm text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
+        <Link href="/game" className="text-sm lg:text-base text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
           Play
         </Link>
       </header>
 
-      <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
+      <h1 className="text-2xl lg:text-3xl font-bold mb-4">Leaderboard</h1>
 
       <div className="flex gap-2 mb-6">
         <button
@@ -100,57 +100,57 @@ export default function LeaderboardPage() {
           {entries.map((e) => (
             <div
               key={e.userId + e.rank}
-              className={`flex items-center justify-between p-3 rounded-lg gap-2 flex-wrap ${
+              className={`flex flex-col gap-1 p-3 rounded-lg text-left ${
                 userRank && e.rank === userRank
                   ? "bg-[#6aaa64]/15 border-2 border-[#6aaa64]"
                   : "bg-[#f6f7f8]"
               }`}
             >
-              <span className="font-semibold shrink-0">#{e.rank}</span>
-              <span className="min-w-0 truncate">{e.username}</span>
-              {type === "daily" ? (
-                <div className="flex items-center gap-3 shrink-0 text-sm">
-                  <span
-                    className={
-                      (e as DailyEntry).isSolved
-                        ? "text-[#6aaa64] font-medium"
-                        : "text-gray-500"
-                    }
-                  >
-                    {(e as DailyEntry).isSolved ? "Win" : "Loss"}
-                  </span>
-                  <span className="text-gray-600">
-                    {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}
-                  </span>
-                  <span className="text-gray-600">
-                    {formatTime((e as DailyEntry).timeInSeconds)}
-                  </span>
-                  {(e as DailyEntry).percentDiff > 0 && (
-                    <span className="text-gray-500">
-                      Δ{(e as DailyEntry).percentDiff.toFixed(0)}%
+              <div className="flex items-center gap-2 text-sm lg:text-base">
+                <span className="font-semibold shrink-0">#{e.rank}</span>
+                <span className="min-w-0 truncate">{e.username}</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-0 text-sm lg:text-base text-gray-600">
+                {type === "daily" ? (
+                  <>
+                    <span
+                      className={
+                        (e as DailyEntry).isSolved
+                          ? "text-[#6aaa64] font-medium"
+                          : "text-gray-500"
+                      }
+                    >
+                      {(e as DailyEntry).isSolved ? "Win" : "Loss"}
                     </span>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 shrink-0 text-sm">
-                  <span className="font-medium">
-                    {(e as AllTimeEntry).wins}W / {(e as AllTimeEntry).totalGames}G
-                  </span>
-                  <span className="text-gray-600">
-                    avg {(e as AllTimeEntry).averageGuesses.toFixed(1)} guesses
-                  </span>
-                  <span className="text-gray-600">
-                    Δ{(e as AllTimeEntry).averagePercentDiff.toFixed(0)}%
-                  </span>
-                </div>
-              )}
+                    <span>
+                      {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}
+                    </span>
+                    <span>
+                      {formatTime((e as DailyEntry).timeInSeconds)}
+                    </span>
+                    {(e as DailyEntry).percentDiff > 0 && (
+                      <span>Δ{(e as DailyEntry).percentDiff.toFixed(0)}%</span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium text-[#1a1a1b]">
+                      {(e as AllTimeEntry).wins}W / {(e as AllTimeEntry).totalGames}G
+                    </span>
+                    <span>
+                      avg {((e as AllTimeEntry).averageGuesses ?? 0).toFixed(1)} guesses
+                    </span>
+                    <span>Δ{((e as AllTimeEntry).averagePercentDiff ?? 0).toFixed(0)}%</span>
+                  </>
+                )}
+              </div>
             </div>
           ))}
         </div>
       )}
 
       {userRank && (
-        <p className="mt-6 text-center text-[#6aaa64] font-medium">
+        <p className="mt-6 text-center text-[#6aaa64] font-medium text-sm lg:text-base">
           Your rank: #{userRank}
         </p>
       )}

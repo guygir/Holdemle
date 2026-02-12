@@ -23,7 +23,6 @@ export async function GET() {
         failedGames: 0,
         currentStreak: 0,
         maxStreak: 0,
-        totalScore: 0,
         averageGuesses: 0,
         averagePercentDiff: 0,
         lastPlayedDate: null,
@@ -50,12 +49,13 @@ export async function GET() {
 
   const { data: recentGuesses } = await supabase
     .from("guesses")
-    .select("puzzle_id, total_score, guesses_used, is_solved, submitted_at")
+    .select("puzzle_id, guesses_used, is_solved, time_taken_seconds, percent_diff, submitted_at")
     .eq("user_id", user.id)
     .order("submitted_at", { ascending: false })
     .limit(10);
 
-  const puzzleIds = [...new Set((recentGuesses ?? []).map((g) => g.puzzle_id))];
+  const completedGuesses = (recentGuesses ?? []).filter((g) => g.guesses_used > 0);
+  const puzzleIds = [...new Set(completedGuesses.map((g) => g.puzzle_id))];
   const { data: puzzles } = puzzleIds.length
     ? await supabase
         .from("puzzles")
@@ -67,11 +67,12 @@ export async function GET() {
     (puzzles ?? []).map((p) => [p.id, p.puzzle_date])
   );
 
-  const recentGames = (recentGuesses ?? []).map((g) => ({
+  const recentGames = completedGuesses.map((g) => ({
     date: puzzleMap[g.puzzle_id],
-    score: g.total_score,
     guessesUsed: g.guesses_used,
     isSolved: g.is_solved,
+    timeInSeconds: g.time_taken_seconds ?? 0,
+    percentDiff: g.percent_diff ?? 0,
   }));
 
   const solvedDist =
@@ -85,7 +86,6 @@ export async function GET() {
       failedGames: stats?.failed_games ?? 0,
       currentStreak: stats?.current_streak ?? 0,
       maxStreak: stats?.max_streak ?? 0,
-      totalScore: stats?.total_score ?? 0,
       averageGuesses: getAverageGuessesFromSolvedDistribution(solvedDist),
       averagePercentDiff: parseFloat(stats?.average_percent_diff ?? "0") || 0,
       lastPlayedDate: stats?.last_played_date ?? null,

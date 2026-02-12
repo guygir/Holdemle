@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getUseDemo } from "@/lib/demo-mode";
+import { MAX_GUESSES } from "@/lib/game-config";
 
 // Demo puzzle - EXACT percentages from poker-odds-calc exhaustive (node scripts/calc-demo-odds.mjs)
 const DEMO_PUZZLE = {
@@ -15,8 +16,9 @@ const DEMO_PUZZLE = {
   difficulty: "medium",
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   const today = new Date().toISOString().split("T")[0];
+  const isDemoRequest = new URL(request.url).searchParams.get("demo") === "1";
   const useDemo = getUseDemo();
   if (useDemo === "fail") {
     return NextResponse.json(
@@ -27,7 +29,7 @@ export async function GET() {
       { status: 503 }
     );
   }
-  if (useDemo) {
+  if (useDemo || isDemoRequest) {
     return NextResponse.json({
       success: true,
       data: {
@@ -70,41 +72,84 @@ export async function GET() {
 
   const user = (await supabase.auth.getUser()).data.user;
   let userGuess = null;
+  let nickname = "";
 
   if (user) {
-    const { data: guess } = await supabase
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("nickname")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    nickname = profile?.nickname ?? user.user_metadata?.nickname ?? user.email?.split("@")[0] ?? "";
+    let { data: guess } = await supabase
       .from("guesses")
       .select("*")
       .eq("puzzle_id", puzzle.id)
       .eq("user_id", user.id)
       .single();
+
+    // No guess yet: create starter row so timer starts at first sight of puzzle
+    if (!guess) {
+      await supabase.from("guesses").upsert(
+        {
+          user_id: user.id,
+          puzzle_id: puzzle.id,
+          guess_history: [],
+          guesses_used: 0,
+          is_solved: false,
+          time_taken_seconds: 0,
+          total_score: 0,
+          percent_diff: 0,
+          game_started_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id,puzzle_id", ignoreDuplicates: true }
+      );
+      const { data: created } = await supabase
+        .from("guesses")
+        .select("*")
+        .eq("puzzle_id", puzzle.id)
+        .eq("user_id", user.id)
+        .single();
+      guess = created;
+    }
+
     userGuess = guess;
   }
+
+  const hasSubmitted = userGuess && userGuess.guesses_used > 0;
+  const gameOver = userGuess && (userGuess.is_solved || userGuess.guesses_used >= MAX_GUESSES);
 
   return NextResponse.json({
     success: true,
     data: {
       puzzleId: puzzle.id,
       date: puzzle.puzzle_date,
+      nickname: nickname || undefined,
       hands: puzzle.hands.map((h: { position: number; cards: string[]; actualPercent?: number }) => ({
         position: h.position,
         cards: h.cards,
-        // Don't send actualPercent to client - only in results
       })),
       difficulty: puzzle.difficulty,
-      userHasGuessed: !!userGuess,
+      userHasGuessed: !!hasSubmitted,
       userGuess: userGuess
         ? {
-            guessHistory: userGuess.guess_history,
+            guessHistory: userGuess.guess_history ?? [],
             guessesUsed: userGuess.guesses_used,
             isSolved: userGuess.is_solved,
             score: userGuess.total_score,
-            actualPercentages: puzzle.hands.map(
-              (h: { position: number; actualPercent: number }) => ({
-                position: h.position,
-                percent: h.actualPercent,
-              })
-            ),
+            timeTakenSeconds: userGuess.time_taken_seconds ?? 0,
+            percentDiff: userGuess.percent_diff ?? 0,
+            submittedAt: userGuess.submitted_at,
+            gameStartedAt: userGuess.game_started_at ?? null,
+            pausedElapsedSeconds: userGuess.paused_elapsed_seconds ?? null,
+            actualPercentages: gameOver
+              ? puzzle.hands.map(
+                  (h: { position: number; actualPercent: number }) => ({
+                    position: h.position,
+                    percent: h.actualPercent,
+                  })
+                )
+              : [],
           }
         : undefined,
     },

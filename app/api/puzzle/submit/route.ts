@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
       { status: 503 }
     );
   }
-  if (useDemo && puzzleId === "demo-puzzle") {
+  // Demo puzzle can be submitted without auth (Try Demo flow)
+  if (puzzleId === "demo-puzzle") {
     const validation = validateGuesses(guesses);
     if (!validation.valid) {
       return NextResponse.json(
@@ -251,6 +252,7 @@ export async function POST(request: NextRequest) {
       );
     }
   } else {
+    const gameStartedAt = new Date(Date.now() - timeInSeconds * 1000).toISOString();
     const { error: insertError } = await supabase.from("guesses").insert({
       user_id: user.id,
       puzzle_id: puzzleId,
@@ -260,6 +262,7 @@ export async function POST(request: NextRequest) {
       time_taken_seconds: timeInSeconds,
       total_score: totalScore,
       percent_diff: percentDiff,
+      game_started_at: gameStartedAt,
     });
 
     if (insertError) {
@@ -289,7 +292,8 @@ export async function POST(request: NextRequest) {
       .from("guesses")
       .select("user_id, is_solved, guesses_used, time_taken_seconds, percent_diff")
       .eq("puzzle_id", puzzleId);
-    const sorted = sortDailyLeaderboard(leaderboard ?? []);
+    const completed = (leaderboard ?? []).filter((g) => g.guesses_used > 0);
+    const sorted = sortDailyLeaderboard(completed);
     const userIndex = sorted.findIndex((r) => r.user_id === user.id);
     rank = userIndex >= 0 ? userIndex + 1 : undefined;
   }

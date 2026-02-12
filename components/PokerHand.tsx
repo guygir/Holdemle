@@ -31,15 +31,15 @@ export function PokerHand({
 }: PokerHandProps) {
   return (
     <div
-      className={`flex items-center gap-2 p-3 rounded-lg border ${
+      className={`flex items-center gap-2 p-3 lg:p-4 rounded-lg border ${
         feedback ? feedbackColors[feedback] : "bg-[#f6f7f8] border-[#d3d6da]"
       }`}
     >
-      <div className="flex gap-1">
+      <div className="flex gap-1 lg:gap-2">
         {cards.map((card) => (
           <div
             key={card}
-            className={`w-10 h-14 rounded flex flex-col items-center justify-center text-sm font-bold ${
+            className={`w-10 h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-sm lg:text-base font-bold ${
               feedback ? "bg-white/20" : "bg-white border border-[#d3d6da]"
             } ${isRedSuit(card) ? "text-red-600" : "text-black"}`}
           >

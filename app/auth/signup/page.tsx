@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function SignupPage() {
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const redirectTo = useMemo(
+    () => searchParams.get("redirect") || "/game",
+    [searchParams]
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -19,11 +25,22 @@ export default function SignupPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { nickname: nickname.trim() || email.split("@")[0] } },
+    });
 
     if (error) {
       setError(error.message);
       setLoading(false);
+      return;
+    }
+
+    // When email confirmation is disabled in Supabase, user gets a session immediately
+    if (data.session) {
+      router.push(redirectTo);
+      router.refresh();
       return;
     }
 
@@ -36,18 +53,17 @@ export default function SignupPage() {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-[#6aaa64] mb-4">
-            Check your email!
+          <h1 className="text-2xl lg:text-3xl font-bold text-[#6aaa64] mb-4">
+            Account created!
           </h1>
           <p className="text-gray-600 mb-6">
-            We&apos;ve sent you a link to confirm your account. Click the link
-            in your email to get started.
+            Check your email to confirm your account, then log in to play.
           </p>
           <Link
-            href="/game"
-            className="inline-block py-3 px-6 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
+            href="/auth/login"
+            className="inline-block py-3 px-6 bg-[#6aaa64] text-white text-lg font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
           >
-            Continue to Game
+            Continue to Login
           </Link>
         </div>
       </main>
@@ -59,18 +75,35 @@ export default function SignupPage() {
       <div className="max-w-md w-full">
         <Link
           href="/"
-          className="text-sm text-gray-600 hover:text-[#1a1a1b] mb-4 block"
+          className="text-base lg:text-lg text-gray-600 hover:text-[#1a1a1b] mb-4 block"
         >
           ← Back to Home
         </Link>
-        <h1 className="text-2xl font-bold text-[#1a1a1b] mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-6">
           Create Account
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
+              htmlFor="nickname"
+              className="block text-base font-medium text-gray-700 mb-1"
+            >
+              Nickname
+            </label>
+            <input
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="How others see you"
+              maxLength={30}
+              className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-base font-medium text-gray-700 mb-1"
             >
               Email
             </label>
@@ -86,7 +119,7 @@ export default function SignupPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-base font-medium text-gray-700 mb-1"
             >
               Password
             </label>
@@ -105,18 +138,29 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-6 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors disabled:opacity-50"
+            className="w-full py-3 px-6 bg-[#6aaa64] text-white text-lg font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
-        <p className="mt-4 text-center text-gray-600 text-sm">
+        <p className="mt-4 text-center text-gray-600 text-base">
           Already have an account?{" "}
-          <Link href="/auth/login" className="text-[#6aaa64] hover:underline">
+          <Link
+            href={`/auth/login${redirectTo !== "/game" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+            className="text-[#6aaa64] hover:underline"
+          >
             Login
           </Link>
         </p>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center p-6"><p className="text-gray-600">Loading...</p></main>}>
+      <SignupForm />
+    </Suspense>
   );
 }

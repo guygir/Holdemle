@@ -2,7 +2,7 @@
  * Central game configuration. Change MAX_GUESSES here to adjust the game;
  * all code should reference this constant instead of hardcoding.
  */
-export const MAX_GUESSES = 3;
+export const MAX_GUESSES = 5;
 
 /** Base score for each guess count. Best guess (1) gets highest, worst gets lowest. */
 export function getBaseScore(guessesUsed: number): number {

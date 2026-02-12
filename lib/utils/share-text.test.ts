@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { formatShareText } from "./share-text";
+import { MAX_GUESSES } from "@/lib/game-config";
 
 describe("formatShareText", () => {
   it("includes date and guesses", () => {
@@ -21,7 +22,7 @@ describe("formatShareText", () => {
     );
     expect(text).toContain("Poker Wordle");
     expect(text).toContain("2026-02-11");
-    expect(text).toContain("1/3");
+    expect(text).toContain(`1/${MAX_GUESSES}`);
     expect(text).toContain("✓");
   });
 
@@ -45,6 +46,6 @@ describe("formatShareText", () => {
     expect(text).toContain("✗");
     expect(text).toContain("🟦");
     expect(text).toContain("🟩");
-    expect(text).toContain("🟨");
+    expect(text).toContain("🟧");
   });
 });
