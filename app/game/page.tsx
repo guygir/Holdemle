@@ -442,7 +442,7 @@ function GameContent() {
               <p className="text-base lg:text-xl font-medium text-gray-600 mb-2">
                 Previous Guesses:
               </p>
-              <div className="flex gap-0 overflow-x-auto pb-2 -mx-1 overscroll-x-contain snap-x snap-mandatory [&>*]:snap-start" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-1 overscroll-x-contain snap-x snap-mandatory [&>*]:snap-start justify-center w-full max-w-full min-w-0" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
                 {puzzle.userGuess.guessHistory.map((attempt, idx) => {
                   const sorted = [...attempt.guesses].sort(
                     (a, b) => b.percent - a.percent
@@ -454,10 +454,10 @@ function GameContent() {
                         idx > 0 ? "border-l-2 border-[#d3d6da]" : ""
                       }`}
                     >
-                      <p className="text-base lg:text-xl font-medium text-gray-500 mb-1">
+                      <p className="text-sm lg:text-lg font-medium text-gray-600 mb-2">
                         Guess {attempt.attempt}:
                       </p>
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {sorted.map((g) => {
                           const hand = puzzle.hands.find(
                             (h) => h.position === g.position
