@@ -1,26 +1,34 @@
-name: Generate Daily Puzzle
+name: Replace Daily Puzzle
 
 on:
   schedule:
-    # Runs at 00:00 UTC every day
+    # Runs at 00:00 UTC every day - replaces puzzle so users can play again
     - cron: "0 0 * * *"
-  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Optional date (YYYY-MM-DD) to replace; leave empty for today"
+        required: false
+        type: string
 
 jobs:
-  generate:
+  replace-puzzle:
     runs-on: ubuntu-latest
     steps:
-      - name: Call generate-daily-puzzle endpoint
+      - name: Call replace-daily-puzzle endpoint
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           APP_URL: ${{ vars.POKER_WORDLE_APP_URL || 'https://poker-wordle.vercel.app' }}
+          DATE_INPUT: ${{ github.event.inputs.date }}
         run: |
           if [ -z "$CRON_SECRET" ]; then
             echo "CRON_SECRET not set - skipping (add to GitHub Secrets for scheduled runs)"
             exit 0
           fi
+          QUERY=""
+          [ -n "$DATE_INPUT" ] && QUERY="?date=${DATE_INPUT}"
           response=$(curl -s -w "\n%{http_code}" -X GET \
-            "${APP_URL}/api/cron/generate-daily-puzzle" \
+            "${APP_URL}/api/cron/generate-daily-puzzle${QUERY}" \
             -H "Authorization: Bearer ${CRON_SECRET}")
           http_code=$(echo "$response" | tail -n1)
           body=$(echo "$response" | sed '$d')

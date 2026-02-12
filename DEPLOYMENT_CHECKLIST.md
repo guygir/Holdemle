@@ -33,22 +33,11 @@ Run in order:
 8. `supabase/migrations/008_unique_nickname.sql` (unique nicknames for leaderboard)
 9. `supabase/migrations/009_handle_nickname_unique_trigger.sql` (auto-unique nickname on signup)
 
-### 1.4 Generate puzzles (local)
-Create `.env.local` in `poker-wordle/`:
+### 1.4 Initial puzzle (optional – cron creates it)
+The daily cron **replaces** today's puzzle (delete + insert). For initial setup, either:
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
-```
-
-Then run:
-```bash
-cd poker-wordle
-npx tsx scripts/generate-puzzles.ts
-```
-
-Optional: `PUZZLE_DAYS=90` for more puzzles. Takes ~5 min for 30 days.
+- **Option A:** Manually trigger the "Replace Daily Puzzle" workflow (Phase 5.2) after deploy – creates today's puzzle.
+- **Option B:** Run `npx tsx scripts/generate-puzzles.ts` locally (requires `.env.local` with Supabase creds) to pre-generate puzzles. Not required for daily operation – the cron handles it.
 
 ---
 
@@ -133,6 +122,8 @@ Set **Site URL** to `https://your-project.vercel.app` for auth redirects after l
 
 ## Phase 5: GitHub cron (after deploy)
 
+The cron **replaces** today's puzzle daily at 00:00 UTC (deletes existing + inserts new), so users can play again after using 5 guesses. Manual trigger replaces today's puzzle for testing.
+
 ### 5.1 Set POKER_WORDLE_APP_URL (if custom domain)
 **Where:** GitHub repo → Settings → Variables
 
@@ -143,9 +134,9 @@ If your Vercel URL is **not** `https://poker-wordle.vercel.app`, add:
 | `POKER_WORDLE_APP_URL` | `https://your-actual-app.vercel.app` |
 
 ### 5.2 Test cron manually
-**Where:** GitHub repo → **Actions** → **Generate Daily Puzzle** → **Run workflow**
+**Where:** GitHub repo → **Actions** → **Replace Daily Puzzle** → **Run workflow**
 
-Check that it runs and returns success.
+Check that it runs and returns success. This creates or replaces today's puzzle.
 
 ---
 
@@ -177,4 +168,4 @@ To use email/password sign-in without email confirmation:
 - **Auth redirect fails** → Add Vercel URL to Supabase redirect URLs.
 - **Cron fails** → Ensure `CRON_SECRET` matches in Vercel and GitHub; check `POKER_WORDLE_APP_URL` if not default.
 - **Guesses / game-over reset when returning** → Run migration 006 (guesses UPDATE policy). Without it, submits after guess 1 fail silently.
-- **In all-time but not today's leaderboard** → "Today" uses UTC. Ensure a puzzle exists for today's UTC date (run generate-puzzles). Add `http://localhost:3000` to Supabase **Authentication → URL Configuration → Redirect URLs** when testing locally.
+- **In all-time but not today's leaderboard** → "Today" uses UTC. Ensure a puzzle exists for today's UTC date (manually trigger Replace Daily Puzzle workflow). Add `http://localhost:3000` to Supabase **Authentication → URL Configuration → Redirect URLs** when testing locally.

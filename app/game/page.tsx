@@ -240,13 +240,27 @@ function GameContent() {
   }
 
   if (error) {
+    const isPuzzleComing = error === "No puzzle for today";
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6">
-        <p className="text-red-600 mb-4">{error}</p>
-        <p className="text-sm text-gray-600 mb-4 text-center">
-          Make sure you have a puzzle for today. Run the puzzle generation script
-          to create puzzles.
-        </p>
+        {isPuzzleComing ? (
+          <>
+            <p className="text-xl sm:text-2xl font-semibold text-[#1a1a1b] mb-2">
+              Today&apos;s puzzle is coming up shortly!
+            </p>
+            <p className="text-sm text-gray-600 mb-4 text-center">
+              Check back in a moment. Our daily puzzle will be ready soon.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-sm text-gray-600 mb-4 text-center">
+              Make sure you have a puzzle for today. Run the puzzle generation script
+              to create puzzles.
+            </p>
+          </>
+        )}
         <Link
           href="/"
           className="py-2 px-4 bg-[#6aaa64] text-white rounded-lg"

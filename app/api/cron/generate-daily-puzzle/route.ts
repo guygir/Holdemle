@@ -1,6 +1,9 @@
 /**
- * Cron endpoint to generate daily puzzle.
+ * Cron endpoint to replace daily puzzle.
  * Secured by CRON_SECRET. Call with: Authorization: Bearer ${CRON_SECRET}
+ *
+ * Replaces the puzzle for the target date (deletes existing + inserts new).
+ * Useful for: daily rotation, manual trigger to refresh today's puzzle.
  *
  * Query: ?date=YYYY-MM-DD (optional, defaults to today)
  */
@@ -62,25 +65,32 @@ export async function GET(request: NextRequest) {
       );
     }
   } else {
-    targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 1); // tomorrow
+    targetDate = new Date(); // today
   }
   const dateStr = targetDate.toISOString().split("T")[0];
 
   try {
     const supabase = createAdminClient();
+
+    // Replace: delete existing puzzle for this date (cascades to guesses)
     const { data: existing } = await supabase
       .from("puzzles")
       .select("id")
       .eq("puzzle_date", dateStr)
-      .single();
+      .maybeSingle();
 
     if (existing) {
-      return NextResponse.json({
-        success: true,
-        message: "Puzzle already exists",
-        date: dateStr,
-      });
+      const { error: delError } = await supabase
+        .from("puzzles")
+        .delete()
+        .eq("puzzle_date", dateStr);
+      if (delError) {
+        console.error("Cron puzzle delete error:", delError);
+        return NextResponse.json(
+          { error: "Failed to delete existing puzzle", details: delError.message },
+          { status: 500 }
+        );
+      }
     }
 
     const weights = parseWeights();
@@ -128,9 +138,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Generated puzzle for ${dateStr}`,
+      message: existing
+        ? `Replaced puzzle for ${dateStr}`
+        : `Generated puzzle for ${dateStr}`,
       date: dateStr,
       difficulty,
+      replaced: !!existing,
       puzzle,
     });
   } catch (err) {
