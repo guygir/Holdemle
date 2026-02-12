@@ -87,9 +87,7 @@ export async function GET(request: NextRequest) {
 
     const entries = sorted.map((s, i) => {
       const p = profileMap.get(s.user_id);
-      const displayName = p
-        ? `${p.nickname}${p.email ? ` (${p.email})` : ""}`
-        : `Player ${String(s.user_id).slice(0, 8)}`;
+      const displayName = p ? p.nickname : `Player ${String(s.user_id).slice(0, 8)}`;
       return {
         rank: i + 1,
         userId: s.user_id,
@@ -159,9 +157,7 @@ export async function GET(request: NextRequest) {
 
   const entries = limited.map((g, i) => {
     const p = profileMap.get(g.user_id);
-    const displayName = p
-      ? `${p.nickname}${p.email ? ` (${p.email})` : ""}`
-      : `Player ${String(g.user_id).slice(0, 8)}`;
+    const displayName = p ? p.nickname : `Player ${String(g.user_id).slice(0, 8)}`;
     return {
       rank: i + 1,
       userId: g.user_id,

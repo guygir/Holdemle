@@ -48,17 +48,18 @@ export default function StatsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 max-w-lg lg:max-w-5xl xl:max-w-6xl 2xl:max-w-screen-2xl mx-auto">
-      <header className="flex justify-between items-center mb-6 min-h-11">
-        <Link href="/" className="text-lg lg:text-xl font-bold text-[#1a1a1b] py-2 -my-2 min-h-[44px] flex items-center">
+    <div className="flex justify-center w-full">
+      <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
+      <header className="flex justify-between items-center mb-3 sm:mb-6 min-h-9 sm:min-h-11">
+        <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
           🃏 Poker Wordle
         </Link>
-        <Link href="/game" className="text-sm lg:text-base text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
-          Play
+        <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+          ← Back
         </Link>
       </header>
 
-      <h1 className="text-2xl lg:text-3xl font-bold mb-6">Your Statistics</h1>
+      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Your Statistics</h1>
 
       {loading ? (
         <p className="text-gray-600">Loading...</p>
@@ -74,18 +75,18 @@ export default function StatsPage() {
         </div>
       ) : stats ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-sm lg:text-base text-gray-600">Total Games</p>
-              <p className="text-2xl lg:text-3xl font-bold">{stats.totalGames}</p>
+          <div className="grid grid-cols-2 gap-2 sm:gap-4">
+            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Total Games</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.totalGames}</p>
             </div>
-            <div className="p-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-sm lg:text-base text-gray-600">Current Streak</p>
-              <p className="text-2xl lg:text-3xl font-bold">{stats.currentStreak}</p>
+            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Current Streak</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.currentStreak}</p>
             </div>
-            <div className="p-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-sm lg:text-base text-gray-600">Max Streak</p>
-              <p className="text-2xl lg:text-3xl font-bold">{stats.maxStreak}</p>
+            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Max Streak</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.maxStreak}</p>
             </div>
           </div>
 
@@ -105,9 +106,9 @@ export default function StatsPage() {
           </div>
 
           {stats.averagePercentDiff > 0 && (
-            <div className="p-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-sm lg:text-base text-gray-600">Avg % diff (lower = better)</p>
-              <p className="text-2xl lg:text-3xl font-bold">
+            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff (lower = better)</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
                 {stats.averagePercentDiff.toFixed(1)}
               </p>
             </div>
@@ -160,5 +161,6 @@ export default function StatsPage() {
         </div>
       ) : null}
     </main>
+    </div>
   );
 }

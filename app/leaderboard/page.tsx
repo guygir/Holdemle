@@ -56,31 +56,34 @@ export default function LeaderboardPage() {
   }, [type]);
 
   return (
-    <main className="min-h-screen p-4 sm:p-6 max-w-lg lg:max-w-5xl xl:max-w-6xl 2xl:max-w-screen-2xl mx-auto">
-      <header className="flex justify-between items-center mb-6 min-h-11">
-        <Link href="/" className="text-lg lg:text-xl font-bold text-[#1a1a1b] py-2 -my-2 min-h-[44px] flex items-center">
-          🃏 Poker Wordle
-        </Link>
-        <Link href="/game" className="text-sm lg:text-base text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
-          Play
-        </Link>
+    <div className="flex justify-center w-full">
+      <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
+      <header className="flex flex-col gap-0.5 mb-3 sm:mb-6">
+        <div className="flex justify-between items-center min-h-9 sm:min-h-11">
+          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+            🃏 Poker Wordle
+          </Link>
+          <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+            ← Back
+          </Link>
+        </div>
       </header>
 
-      <h1 className="text-2xl lg:text-3xl font-bold mb-4">Leaderboard</h1>
+      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Leaderboard</h1>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-4">
         <button
           onClick={() => setType("daily")}
-          className={`min-h-[44px] px-4 py-2 rounded-lg font-medium [touch-action:manipulation] ${
-            type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8]"
+          className={`min-h-[36px] sm:min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-base lg:text-lg rounded-lg font-medium [touch-action:manipulation] ${
+            type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
           }`}
         >
           Today
         </button>
         <button
           onClick={() => setType("alltime")}
-          className={`min-h-[44px] px-4 py-2 rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8]"
+          className={`min-h-[36px] sm:min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-base lg:text-lg rounded-lg font-medium [touch-action:manipulation] ${
+            type === "alltime" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
           }`}
         >
           All Time
@@ -88,59 +91,59 @@ export default function LeaderboardPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600 text-xs sm:text-base lg:text-xl">Loading...</p>
       ) : entries.length === 0 ? (
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-xs sm:text-base lg:text-xl">
           {isDemoMode
             ? "Login and play to see the leaderboard."
             : "No entries yet. Be the first to complete today's puzzle!"}
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 sm:space-y-3">
           {entries.map((e) => (
             <div
               key={e.userId + e.rank}
-              className={`flex flex-col gap-1 p-3 rounded-lg text-left ${
+              className={`flex flex-col gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border border-[#d3d6da] ${
                 userRank && e.rank === userRank
                   ? "bg-[#6aaa64]/15 border-2 border-[#6aaa64]"
                   : "bg-[#f6f7f8]"
               }`}
             >
-              <div className="flex items-center gap-2 text-sm lg:text-base">
+              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-base lg:text-xl">
                 <span className="font-semibold shrink-0">#{e.rank}</span>
-                <span className="min-w-0 truncate">{e.username}</span>
+                <span className="min-w-0 truncate font-medium">{e.username}</span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-0 text-sm lg:text-base text-gray-600">
+              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-6 gap-y-0 text-xs sm:text-base lg:text-xl text-gray-600">
                 {type === "daily" ? (
                   <>
                     <span
                       className={
                         (e as DailyEntry).isSolved
-                          ? "text-[#6aaa64] font-medium"
-                          : "text-gray-500"
+                          ? "text-[#6aaa64] font-bold"
+                          : "text-gray-600 font-bold"
                       }
                     >
-                      {(e as DailyEntry).isSolved ? "Win" : "Loss"}
+                      {(e as DailyEntry).isSolved ? "WIN" : "LOSS"}
                     </span>
                     <span>
-                      {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}
+                      Guesses: {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}
                     </span>
                     <span>
-                      {formatTime((e as DailyEntry).timeInSeconds)}
+                      Time: {formatTime((e as DailyEntry).timeInSeconds)}
                     </span>
                     {(e as DailyEntry).percentDiff > 0 && (
-                      <span>Δ{(e as DailyEntry).percentDiff.toFixed(0)}%</span>
+                      <span>Difference: Δ{(e as DailyEntry).percentDiff.toFixed(0)}%</span>
                     )}
                   </>
                 ) : (
                   <>
                     <span className="font-medium text-[#1a1a1b]">
-                      {(e as AllTimeEntry).wins}W / {(e as AllTimeEntry).totalGames}G
+                      Wins: {(e as AllTimeEntry).wins} / Games: {(e as AllTimeEntry).totalGames}
                     </span>
                     <span>
-                      avg {((e as AllTimeEntry).averageGuesses ?? 0).toFixed(1)} guesses
+                      Avg guesses: {((e as AllTimeEntry).averageGuesses ?? 0).toFixed(1)}
                     </span>
-                    <span>Δ{((e as AllTimeEntry).averagePercentDiff ?? 0).toFixed(0)}%</span>
+                    <span>Avg diff: Δ{((e as AllTimeEntry).averagePercentDiff ?? 0).toFixed(0)}%</span>
                   </>
                 )}
               </div>
@@ -150,10 +153,11 @@ export default function LeaderboardPage() {
       )}
 
       {userRank && (
-        <p className="mt-6 text-center text-[#6aaa64] font-medium text-sm lg:text-base">
+        <p className="mt-4 sm:mt-6 text-center text-[#6aaa64] font-medium text-xs sm:text-base lg:text-xl">
           Your rank: #{userRank}
         </p>
       )}
     </main>
+    </div>
   );
 }

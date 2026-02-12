@@ -2,9 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Larger base font size - scales all text for readability */
+/* Responsive base font: smaller on mobile, larger on desktop */
 html {
-  font-size: 137.5%; /* ~22px base (was 16px) */
+  font-size: 87.5%; /* ~14px on mobile - compact */
+}
+@media (min-width: 640px) {
+  html { font-size: 100%; }
+}
+@media (min-width: 1024px) {
+  html { font-size: 112.5%; }
+}
+@media (min-width: 1280px) {
+  html { font-size: 125%; }
 }
 
 :root {

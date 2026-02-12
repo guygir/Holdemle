@@ -263,21 +263,21 @@ function GameContent() {
 
   return (
     <div className="flex justify-center w-full">
-      <main className="min-h-screen p-3 sm:p-4 w-full max-w-[96vw]">
+      <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
       {showTutorial && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm shadow-xl">
-            <h2 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-2 sm:mb-3">
               How to Play
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
               Guess the pre-flop win percentages for 4 poker hands. Your guesses
               must sum to <strong>100%</strong>. You get{" "}
               <strong>{MAX_GUESSES} guesses</strong>.
             </p>
             <button
               onClick={dismissTutorial}
-              className="w-full min-h-[44px] py-3 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
+              className="w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
             >
               Got it!
             </button>
@@ -286,15 +286,15 @@ function GameContent() {
       )}
 
       {showFeedbackTutorial && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm shadow-xl">
-            <h2 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-2 sm:mb-3">
               Understanding Feedback
             </h2>
-            <p className="text-gray-600 mb-3">
+            <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3">
               Each hand gets color-coded feedback based on your guess:
             </p>
-            <ul className="space-y-2 text-base lg:text-lg text-gray-700 mb-4">
+            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-base lg:text-lg text-gray-700 mb-3 sm:mb-4">
               <li className="flex items-center gap-2">
                 <span className="inline-block w-6 h-6 rounded bg-[#6aaa64] flex-shrink-0" />
                 <strong>Exact</strong> — Your guess matches the actual percentage
@@ -310,7 +310,7 @@ function GameContent() {
             </ul>
             <button
               onClick={dismissFeedbackTutorial}
-              className="w-full min-h-[44px] py-3 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
+              className="w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
             >
               Got it!
             </button>
@@ -318,12 +318,12 @@ function GameContent() {
         </div>
       )}
 
-      <header className="flex flex-col gap-1 mb-6">
-        <div className="flex justify-between items-center min-h-11">
-          <Link href="/" className="text-lg lg:text-2xl font-bold text-[#1a1a1b] py-2 -my-2 min-h-[44px] flex items-center">
+      <header className="flex flex-col gap-0.5 mb-3 sm:mb-6">
+        <div className="flex justify-between items-center min-h-9 sm:min-h-11">
+          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
             🃏 Poker Wordle
           </Link>
-          <span className="text-base lg:text-xl text-gray-600">
+          <span className="text-xs sm:text-base lg:text-xl text-gray-600">
           {isDemoMode ? (
             <span className="bg-[#85c0f9]/20 text-[#85c0f9] px-2 py-0.5 rounded font-medium">
               Demo
@@ -334,12 +334,12 @@ function GameContent() {
           </span>
         </div>
         {puzzle.nickname && !isDemoMode && (
-          <p className="text-base lg:text-xl text-gray-600">Hello, {puzzle.nickname}</p>
+          <p className="text-xs sm:text-base lg:text-xl text-gray-600">Hello, {puzzle.nickname}</p>
         )}
       </header>
 
       {isGameOver && puzzle.userGuess ? (
-        <>
+        <div className="flex flex-col min-h-0">
           <ResultsDisplay
             guessHistory={puzzle.userGuess.guessHistory}
             hands={puzzle.hands}
@@ -349,50 +349,52 @@ function GameContent() {
             timeInSeconds={puzzle.userGuess.timeTakenSeconds ?? 0}
             percentDiff={puzzle.userGuess.percentDiff ?? 0}
           />
-          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row gap-2 sm:gap-3">
             <ShareButton
               guessHistory={puzzle.userGuess.guessHistory}
               date={puzzle.date}
               isSolved={puzzle.userGuess.isSolved}
               guessesUsed={puzzle.userGuess.guessesUsed}
-              className="flex-1 min-h-[44px] lg:min-h-[52px] lg:py-3 lg:text-xl py-2 px-4 hover:bg-[#e8e9eb]"
+              className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 hover:bg-[#e8e9eb]"
             />
             {isDemoMode ? (
               <div className="flex-1 flex flex-col gap-2">
                 <Link
                   href="/game"
-                  className="min-h-[44px] lg:min-h-[52px] lg:py-3 lg:text-xl py-2 px-4 bg-[#6aaa64] text-white rounded-lg font-medium hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 bg-[#6aaa64] text-white rounded-lg font-medium hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Play for Real
                 </Link>
-                <p className="text-center text-base lg:text-lg text-gray-500">
+                <p className="text-center text-xs sm:text-base lg:text-lg text-gray-500">
                   Sign up to play daily puzzles and save your scores
                 </p>
               </div>
             ) : (
               <Link
                 href="/"
-                className="flex-1 min-h-[44px] lg:min-h-[52px] lg:py-3 lg:text-xl py-2 px-4 bg-[#f6f7f8] border border-[#d3d6da] rounded-lg font-medium hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl px-3 sm:px-4 bg-[#f6f7f8] border border-[#d3d6da] rounded-lg font-medium hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
                 Back to Home
               </Link>
             )}
           </div>
-        </>
+        </div>
       ) : (
-        <>
-          <div className="mb-4 flex justify-between text-base lg:text-xl">
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex flex-col max-h-[48vh] shrink-0 overflow-y-auto">
+          <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
-            <Timer startTime={startTime} className="font-mono text-base lg:text-xl" />
+            <Timer startTime={startTime} className="font-mono text-xs sm:text-base lg:text-xl" />
           </div>
 
-          <div className="space-y-4 mb-6">
+          <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center">
             {puzzle.hands.map((hand) => (
-              <div key={hand.position} className="flex items-center gap-3">
-                <div className="flex-1">
+              <div key={hand.position} className="flex items-center gap-1.5 sm:gap-3 justify-center">
+                <div className="flex-initial max-w-[280px] sm:max-w-[360px]">
                   <PokerHand
                     cards={hand.cards}
                     showPercent={false}
+                    size="large"
                   />
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -409,16 +411,16 @@ function GameContent() {
                       }));
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                    className="w-14 sm:w-16 lg:w-20 min-h-[44px] lg:min-h-[52px] px-2 py-2 text-base lg:text-xl border border-[#d3d6da] rounded text-center font-semibold [touch-action:manipulation]"
+                    className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border border-[#d3d6da] rounded text-center font-semibold [touch-action:manipulation]"
                   />
-                  <span className="text-base lg:text-xl">%</span>
+                  <span className="text-sm sm:text-base lg:text-xl">%</span>
                 </div>
               </div>
             ))}
           </div>
 
           <p
-            className={`text-base lg:text-xl mb-4 ${
+            className={`text-xs sm:text-base lg:text-xl mb-1 sm:mb-2 ${
               total === 100 ? "text-[#6aaa64]" : "text-gray-600"
             }`}
           >
@@ -426,38 +428,34 @@ function GameContent() {
           </p>
 
           {submitError && (
-            <p className="text-red-600 text-base lg:text-lg mb-2">{submitError}</p>
+            <p className="text-red-600 text-xs sm:text-base lg:text-lg mb-2">{submitError}</p>
           )}
+          </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={total !== 100 || submitting}
-            className="w-full min-h-[44px] lg:min-h-[56px] py-3 lg:py-4 lg:text-2xl bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] disabled:opacity-50 disabled:cursor-not-allowed transition-colors [touch-action:manipulation]"
-          >
-            {submitting ? "Submitting..." : "Submit Guess"}
-          </button>
-
-          {puzzle.userGuess?.guessHistory && puzzle.userGuess.guessHistory.length > 0 && (
-            <div className="mt-8">
-              <p className="text-base lg:text-xl font-medium text-gray-600 mb-2">
+          <div className="mt-2 sm:mt-4 flex-1 min-h-0 flex flex-col">
+            <button
+              onClick={handleSubmit}
+              disabled={total !== 100 || submitting}
+              className="w-full min-h-[36px] sm:min-h-[40px] py-1.5 sm:py-2 text-sm sm:text-base lg:text-lg bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] disabled:opacity-50 disabled:cursor-not-allowed transition-colors [touch-action:manipulation] shrink-0"
+            >
+              {submitting ? "Submitting..." : "Submit Guess"}
+            </button>
+            {puzzle.userGuess?.guessHistory && puzzle.userGuess.guessHistory.length > 0 && (
+            <div className="mt-2 sm:mt-3 flex-1 min-h-0 overflow-y-auto">
+              <p className="text-xs sm:text-base lg:text-xl font-medium text-gray-600 mb-1 sm:mb-2">
                 Previous Guesses:
               </p>
-              <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-1 overscroll-x-contain snap-x snap-mandatory [&>*]:snap-start justify-center w-full max-w-full min-w-0" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-                {puzzle.userGuess.guessHistory.map((attempt, idx) => {
+              <div className="space-y-2 sm:space-y-3">
+                {puzzle.userGuess.guessHistory.map((attempt) => {
                   const sorted = [...attempt.guesses].sort(
                     (a, b) => b.percent - a.percent
                   );
                   return (
-                    <div
-                      key={attempt.attempt}
-                      className={`flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[240px] xl:min-w-[260px] flex flex-col pl-2 sm:pl-3 ${
-                        idx > 0 ? "border-l-2 border-[#d3d6da]" : ""
-                      }`}
-                    >
-                      <p className="text-sm lg:text-lg font-medium text-gray-600 mb-2">
+                    <div key={attempt.attempt} className="flex flex-col gap-1">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600">
                         Guess {attempt.attempt}:
                       </p>
-                      <div className="space-y-2">
+                      <div className="grid grid-cols-4 gap-1 sm:gap-2">
                         {sorted.map((g) => {
                           const hand = puzzle.hands.find(
                             (h) => h.position === g.position
@@ -479,18 +477,21 @@ function GameContent() {
                 })}
               </div>
             </div>
-          )}
-        </>
+            )}
+          </div>
+        </div>
       )}
 
-      <nav className="mt-8 flex flex-wrap gap-3 text-base lg:text-xl">
-        <Link href="/leaderboard" className="text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
+      <nav className="mt-4 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-base lg:text-xl">
+        <Link href="/leaderboard" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
           Leaderboard
         </Link>
-        <Link href="/stats" className="text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
-          Stats
-        </Link>
-        <Link href="/how-to-play" className="text-[#6aaa64] hover:underline py-2 min-h-[44px] flex items-center">
+        {!isDemoMode && (
+          <Link href="/stats" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
+            Stats
+          </Link>
+        )}
+        <Link href="/how-to-play" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
           How to Play
         </Link>
       </nav>

@@ -43,38 +43,30 @@ export function ResultsDisplay({
   const getPercent = (a: { position: number; percent?: number; actualPercent?: number }) =>
     a.percent ?? (a as { actualPercent?: number }).actualPercent ?? 0;
 
-  const actualMap = Object.fromEntries(
-    actualPercentages.map((a) => [a.position, getPercent(a)])
-  );
-
   const sortedActual = [...actualPercentages]
     .map((a) => ({ ...a, percent: getPercent(a) }))
     .sort((a, b) => b.percent - a.percent);
 
   return (
-    <div className="space-y-6 w-full max-w-full min-w-0">
-      <h2 className="text-xl lg:text-2xl xl:text-3xl font-bold text-center">
+    <div className="space-y-2 sm:space-y-4 w-full max-w-full min-w-0">
+      <h2 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold text-center">
         {isSolved
           ? `Solved in ${guessesUsed} guess${guessesUsed > 1 ? "es" : ""}! 🎉`
           : "Better luck next time!"}
       </h2>
 
-      <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-1 w-full max-w-full min-w-0 justify-center">
-        {guessHistory.map((attempt, idx) => {
+      {/* Rows: each attempt is a row with 4 hands horizontal */}
+      <div className="space-y-2 sm:space-y-3">
+        {guessHistory.map((attempt) => {
           const sorted = [...attempt.guesses].sort(
             (a, b) => b.percent - a.percent
           );
           return (
-            <div
-              key={attempt.attempt}
-              className={`flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[240px] xl:min-w-[260px] flex flex-col pl-2 sm:pl-3 ${
-                idx > 0 ? "border-l-2 border-[#d3d6da]" : ""
-              }`}
-            >
-              <p className="text-sm lg:text-lg font-medium text-gray-600 mb-2">
+            <div key={attempt.attempt} className="flex flex-col gap-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600">
                 Guess {attempt.attempt}:
               </p>
-              <div className="space-y-2">
+              <div className="grid grid-cols-4 gap-1 sm:gap-2">
                 {sorted.map((g) => {
                   const hand = hands.find((h) => h.position === g.position);
                   if (!hand) return null;
@@ -93,11 +85,12 @@ export function ResultsDisplay({
             </div>
           );
         })}
-        <div className="flex-1 min-w-[180px] sm:min-w-[200px] lg:min-w-[240px] xl:min-w-[260px] flex flex-col border-l-2 border-[#d3d6da] pl-2 sm:pl-3">
-          <p className="text-sm lg:text-lg font-medium text-gray-600 mb-2">
+        {/* Correct row */}
+        <div className="flex flex-col gap-1 pt-1 border-t border-[#d3d6da]">
+          <p className="text-xs sm:text-sm font-medium text-gray-600">
             Correct:
           </p>
-          <div className="space-y-2">
+          <div className="grid grid-cols-4 gap-1 sm:gap-2">
             {sortedActual.map((a) => {
               const hand = hands.find((h) => h.position === a.position);
               if (!hand) return null;
@@ -112,15 +105,15 @@ export function ResultsDisplay({
               return (
                 <div
                   key={a.position}
-                  className={`flex items-center gap-2 p-3 lg:p-4 rounded-lg border min-w-0 ${
+                  className={`flex items-center gap-1 sm:gap-2 p-1.5 sm:p-2 rounded-lg border min-w-0 ${
                     isCorrect ? "bg-[#6aaa64] border-[#5a9a54] text-white" : "bg-[#dc2626] border-[#b91c1c] text-white"
                   }`}
                 >
-                  <div className="flex gap-1 lg:gap-2 flex-shrink-0">
+                  <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
                     {hand.cards.map((card) => (
                       <div
                         key={card}
-                        className={`w-10 h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-sm lg:text-base font-bold bg-white border border-[#d3d6da] ${
+                        className={`w-6 h-8 sm:w-8 sm:h-11 lg:w-10 lg:h-14 rounded flex flex-col items-center justify-center text-[10px] sm:text-xs font-bold bg-white border border-[#d3d6da] ${
                           isRedSuit(card) ? "text-red-600" : "text-black"
                         }`}
                       >
@@ -128,12 +121,12 @@ export function ResultsDisplay({
                       </div>
                     ))}
                   </div>
-                  <div className="ml-auto shrink-0 w-12 text-right flex flex-col items-end">
-                    <span className="font-bold text-white text-sm lg:text-lg">
+                  <div className="ml-auto shrink-0 text-right flex flex-col items-end">
+                    <span className="font-bold text-white text-[10px] sm:text-xs">
                       {actual}%
                     </span>
                     {diff > 0 && (
-                      <span className="text-xs lg:text-base font-semibold text-white">
+                      <span className="text-[9px] sm:text-[10px] font-semibold text-white">
                         (Δ{diff}%)
                       </span>
                     )}
@@ -145,25 +138,25 @@ export function ResultsDisplay({
         </div>
       </div>
 
-      <div className="pt-4 border-t border-[#d3d6da] space-y-2">
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a1b]">
+      <div className="pt-3 sm:pt-5 border-t border-[#d3d6da] space-y-1 sm:space-y-2">
+        <div className="flex flex-wrap gap-x-4 sm:gap-x-8 gap-y-2 text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a1b]">
           <span>
-            {isSolved ? "Win" : "Loss"}
+            {isSolved ? "WIN" : "LOSS"}
           </span>
           <span className="text-gray-600 font-semibold">
-            {guessesUsed}/{MAX_GUESSES} guesses
+            Guesses: {guessesUsed}/{MAX_GUESSES}
           </span>
           <span className="text-gray-600 font-semibold">
-            {formatTime(timeInSeconds)}
+            Time: {formatTime(timeInSeconds)}
           </span>
           {percentDiff > 0 && (
             <span className="text-gray-600 font-semibold">
-              Δ{percentDiff.toFixed(0)}%
+              Difference: Δ{percentDiff.toFixed(0)}%
             </span>
           )}
         </div>
         {rank && (
-          <p className="text-xl lg:text-2xl xl:text-3xl text-gray-600 font-semibold">Rank: #{rank} today</p>
+          <p className="text-base sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 font-semibold">Rank: #{rank} today</p>
         )}
       </div>
     </div>

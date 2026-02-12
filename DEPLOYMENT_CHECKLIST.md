@@ -30,6 +30,8 @@ Run in order:
 5. `supabase/migrations/005_game_started_at.sql` (timer restoration)
 6. `supabase/migrations/006_guesses_update_policy.sql` (persist guesses on submit)
 7. `supabase/migrations/007_paused_elapsed.sql` (timer pauses when leaving page)
+8. `supabase/migrations/008_unique_nickname.sql` (unique nicknames for leaderboard)
+9. `supabase/migrations/009_handle_nickname_unique_trigger.sql` (auto-unique nickname on signup)
 
 ### 1.4 Generate puzzles (local)
 Create `.env.local` in `poker-wordle/`:
