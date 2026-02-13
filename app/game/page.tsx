@@ -171,7 +171,7 @@ function GameContent() {
     }
   }, []);
 
-  const total = Object.values(guesses).reduce((a, b) => a + b, 0);
+  const total = Object.values(guesses).reduce((a, b) => a + (b ?? 0), 0);
   const attemptNumber = puzzle?.userGuess
     ? puzzle.userGuess.guessesUsed + 1
     : 1;
@@ -413,13 +413,13 @@ function GameContent() {
                   <button
                     type="button"
                     onClick={() => {
-                      const v = guesses[hand.position] ?? 25;
+                      const v = guesses[hand.position] ?? 0;
                       setGuesses((g) => ({
                         ...g,
                         [hand.position]: Math.max(0, v - 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 min-w-[24px] min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-l bg-[#f6f7f8] hover:bg-[#e8e9eb] text-[10px] sm:text-xs [touch-action:manipulation]"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-l bg-[#f6f7f8] hover:bg-[#e8e9eb] text-lg sm:text-xl [touch-action:manipulation]"
                     aria-label="Decrease by 1"
                   >
                     ↓
@@ -430,11 +430,22 @@ function GameContent() {
                     max={100}
                     value={guesses[hand.position] ?? ""}
                     onChange={(e) => {
-                      const v = parseInt(e.target.value, 10);
-                      setGuesses((g) => ({
-                        ...g,
-                        [hand.position]: isNaN(v) ? 25 : Math.min(100, Math.max(0, v)),
-                      }));
+                      const raw = e.target.value;
+                      if (raw === "") {
+                        setGuesses((g) => {
+                          const next = { ...g };
+                          delete next[hand.position];
+                          return next;
+                        });
+                        return;
+                      }
+                      const v = parseInt(raw, 10);
+                      if (!isNaN(v)) {
+                        setGuesses((g) => ({
+                          ...g,
+                          [hand.position]: Math.min(100, Math.max(0, v)),
+                        }));
+                      }
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                     className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border-y border-[#d3d6da] border-x-0 font-semibold [touch-action:manipulation] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -442,13 +453,13 @@ function GameContent() {
                   <button
                     type="button"
                     onClick={() => {
-                      const v = guesses[hand.position] ?? 25;
+                      const v = guesses[hand.position] ?? 0;
                       setGuesses((g) => ({
                         ...g,
                         [hand.position]: Math.min(100, v + 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 min-w-[24px] min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-r bg-[#f6f7f8] hover:bg-[#e8e9eb] text-[10px] sm:text-xs [touch-action:manipulation]"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-r bg-[#f6f7f8] hover:bg-[#e8e9eb] text-lg sm:text-xl [touch-action:manipulation]"
                     aria-label="Increase by 1"
                   >
                     ↑

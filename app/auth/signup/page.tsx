@@ -2,7 +2,6 @@
 
 import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function SignupForm() {
@@ -11,63 +10,37 @@ function SignupForm() {
     () => searchParams.get("redirect") || "/game",
     [searchParams]
   );
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { nickname: nickname.trim() || email.split("@")[0] } },
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nickname: nickname.trim(),
+        password,
+      }),
     });
 
-    if (error) {
-      setError(error.message);
+    const json = await res.json();
+
+    if (!res.ok) {
+      setError(json.error || "Sign up failed");
       setLoading(false);
       return;
     }
 
-    // When email confirmation is disabled in Supabase, user gets a session immediately
-    if (data.session) {
-      router.push(redirectTo);
-      router.refresh();
-      return;
-    }
-
-    setSuccess(true);
-    setLoading(false);
+    router.push(redirectTo);
     router.refresh();
-  }
-
-  if (success) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-6">
-        <div className="max-w-md w-full text-center">
-          <h1 className="text-2xl lg:text-3xl font-bold text-[#6aaa64] mb-4">
-            Account created!
-          </h1>
-          <p className="text-gray-600 mb-6">
-            Check your email to confirm your account, then log in to play.
-          </p>
-          <Link
-            href="/auth/login"
-            className="inline-block py-3 px-6 bg-[#6aaa64] text-white text-lg font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors"
-          >
-            Continue to Login
-          </Link>
-        </div>
-      </main>
-    );
+    setLoading(false);
   }
 
   return (
@@ -95,26 +68,12 @@ function SignupForm() {
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="How others see you"
+              placeholder="How others see you on leaderboards"
               maxLength={30}
-              className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-base font-medium text-gray-700 mb-1"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
             />
+            <p className="text-xs text-gray-500 mt-1">2-30 characters, must be unique</p>
           </div>
           <div>
             <label

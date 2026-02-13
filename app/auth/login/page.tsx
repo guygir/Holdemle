@@ -2,7 +2,6 @@
 
 import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function LoginForm() {
@@ -11,28 +10,37 @@ function LoginForm() {
     () => searchParams.get("redirect") || "/game",
     [searchParams]
   );
-  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nickname: nickname.trim(),
+        password,
+      }),
+    });
 
-    if (error) {
-      setError(error.message);
+    const json = await res.json();
+
+    if (!res.ok) {
+      setError(json.error || "Login failed");
       setLoading(false);
       return;
     }
 
     router.push(redirectTo);
     router.refresh();
+    setLoading(false);
   }
 
   return (
@@ -52,16 +60,17 @@ function LoginForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="nickname"
               className="block text-base font-medium text-gray-700 mb-1"
             >
-              Email
+              Nickname
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="nickname"
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="Your nickname"
               required
               className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
             />

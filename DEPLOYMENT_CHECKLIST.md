@@ -32,8 +32,14 @@ Run in order:
 7. `supabase/migrations/007_paused_elapsed.sql` (timer pauses when leaving page)
 8. `supabase/migrations/008_unique_nickname.sql` (unique nicknames for leaderboard)
 9. `supabase/migrations/009_handle_nickname_unique_trigger.sql` (auto-unique nickname on signup)
+10. `supabase/migrations/010_auth_email_and_login_function.sql` (nickname+password login lookup)
 
-### 1.4 Initial puzzle (optional – cron creates it)
+### 1.4 Disable email confirmation
+**Where:** Supabase Dashboard → **Authentication** → **Providers** → **Email**
+
+Turn **OFF** "Confirm email". New users sign up with nickname+password; a synthetic email is generated internally.
+
+### 1.5 Initial puzzle (optional – cron creates it)
 The daily cron **replaces** today's puzzle (delete + insert). For initial setup, either:
 
 - **Option A:** Manually trigger the "Replace Daily Puzzle" workflow (Phase 5.2) after deploy – creates today's puzzle.
@@ -167,5 +173,6 @@ To use email/password sign-in without email confirmation:
 - **503 "Supabase not configured"** → Check Vercel env vars; redeploy after adding.
 - **Auth redirect fails** → Add Vercel URL to Supabase redirect URLs.
 - **Cron fails** → Ensure `CRON_SECRET` matches in Vercel and GitHub; check `POKER_WORDLE_APP_URL` if not default.
+- **Sign up fails with "invalid email"** → Set `AUTH_EMAIL_DOMAIN` to a domain you control (e.g. `users.yourdomain.com`). Default `holdemle.invalid` may be rejected.
 - **Guesses / game-over reset when returning** → Run migration 006 (guesses UPDATE policy). Without it, submits after guess 1 fail silently.
 - **In all-time but not today's leaderboard** → "Today" uses UTC. Ensure a puzzle exists for today's UTC date (manually trigger Replace Daily Puzzle workflow). Add `http://localhost:3000` to Supabase **Authentication → URL Configuration → Redirect URLs** when testing locally.
