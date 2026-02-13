@@ -106,26 +106,26 @@ export default function StatsPage() {
                       const h = maxCount > 0 ? Math.max(8, (count / maxCount) * 48) : 0;
                       return (
                         <div key={n} className="flex flex-col items-center flex-1">
-                          <span className="text-[10px] sm:text-xs mb-0.5 font-medium">{count}</span>
+                          <span className="text-[10px] sm:text-xs mb-0.5 font-medium text-[#6aaa64]">{count}</span>
                           <div
                             className="w-full rounded-t bg-[#6aaa64] min-h-[4px]"
                             style={{ height: `${h}px` }}
                             title={`${n} guess${n > 1 ? "es" : ""}: ${count}`}
                           />
-                          <span className="text-[10px] sm:text-xs mt-1">{n}</span>
+                          <span className="text-[10px] sm:text-xs mt-1 text-[#6aaa64] font-medium">{n}</span>
                         </div>
                       );
                     })}
                     <div className="flex flex-col items-center flex-1">
-                      <span className="text-[10px] sm:text-xs mb-0.5 font-medium">{failed}</span>
+                      <span className="text-[10px] sm:text-xs mb-0.5 font-medium text-[#dc2626]">{failed}</span>
                       <div
                         className="w-full rounded-t bg-[#dc2626] min-h-[4px]"
                         style={{
                           height: `${maxCount > 0 ? Math.max(8, (failed / maxCount) * 48) : 0}px`,
                         }}
-                        title={`Failed: ${failed}`}
+                        title={`Loss: ${failed}`}
                       />
-                      <span className="text-[10px] sm:text-xs mt-1">Failed</span>
+                      <span className="text-[10px] sm:text-xs mt-1 text-[#dc2626] font-medium">LOSS</span>
                     </div>
                   </>
                 );
@@ -163,7 +163,10 @@ export default function StatsPage() {
                     className="p-3 bg-[#f6f7f8] rounded-lg flex flex-col gap-0.5"
                   >
                     <p className="text-sm lg:text-base font-medium">
-                      {g.isSolved ? "Won" : "Failed"}, Guesses: {g.guessesUsed}/{MAX_GUESSES}, Time: {formatTime(g.timeInSeconds)}, Diff: Δ{g.percentDiff.toFixed(0)}%
+                      <span className={g.isSolved ? "text-[#6aaa64] font-bold" : "text-[#dc2626] font-bold"}>
+                        {g.isSolved ? "WON" : "LOSS"}
+                      </span>
+                      , Guesses: {g.guessesUsed}/{MAX_GUESSES}, Time: {formatTime(g.timeInSeconds)}, Diff: Δ{g.percentDiff.toFixed(0)}%
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500">{g.date}</p>
                   </div>

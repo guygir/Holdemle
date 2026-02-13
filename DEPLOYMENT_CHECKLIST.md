@@ -128,7 +128,7 @@ Set **Site URL** to `https://your-project.vercel.app` for auth redirects after l
 
 ## Phase 5: GitHub cron (after deploy)
 
-The cron **replaces** today's puzzle daily at 10:00 UTC (testing; change to 08:00 UTC for prod). Until the cron runs, the previous day's puzzle stays live. Manual trigger replaces today's puzzle for testing.
+The cron **replaces** today's puzzle daily at 03:30 UTC (~8 AM Israel/local). Until the cron runs, the previous day's puzzle stays live. Manual trigger replaces today's puzzle for testing.
 
 ### 5.1 Set POKER_WORDLE_APP_URL (if custom domain)
 **Where:** GitHub repo → Settings → Variables

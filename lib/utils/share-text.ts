@@ -31,8 +31,10 @@ export function formatShareText(
   guessesUsed: number
 ): string {
   const lines: string[] = [];
+  lines.push("Hold'emle");
+  lines.push(date);
   lines.push(
-    `Hold'emle ${date} ${guessesUsed}/${MAX_GUESSES} ${isSolved ? "✓" : "✗"}`
+    `I ${isSolved ? "Won" : "Lost"}, using ${guessesUsed}/${MAX_GUESSES} guesses.`
   );
 
   const orderedPositions = [1, 2, 3, 4];

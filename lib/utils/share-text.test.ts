@@ -23,7 +23,7 @@ describe("formatShareText", () => {
     expect(text).toContain("Hold'emle");
     expect(text).toContain("2026-02-11");
     expect(text).toContain(`1/${MAX_GUESSES}`);
-    expect(text).toContain("✓");
+    expect(text).toContain("I Won");
   });
 
   it("includes emoji rows for each attempt", () => {
@@ -43,7 +43,7 @@ describe("formatShareText", () => {
       false,
       1
     );
-    expect(text).toContain("✗");
+    expect(text).toContain("I Lost");
     expect(text).toContain("🟦");
     expect(text).toContain("🟩");
     expect(text).toContain("🟧");

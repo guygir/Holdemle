@@ -120,10 +120,10 @@ export default function LeaderboardPage() {
                       className={
                         (e as DailyEntry).isSolved
                           ? "text-[#6aaa64] font-bold"
-                          : "text-gray-600 font-bold"
+                          : "text-[#dc2626] font-bold"
                       }
                     >
-                      {(e as DailyEntry).isSolved ? "WIN" : "LOSS"}
+                      {(e as DailyEntry).isSolved ? "WON" : "LOSS"}
                     </span>
                     <span>
                       Guesses: {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}

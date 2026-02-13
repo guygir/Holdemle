@@ -2,8 +2,8 @@ name: Replace Daily Puzzle
 
 on:
   schedule:
-    # Runs at 10:00 UTC (testing) - change to "0 8 * * *" for 8 AM UTC prod
-    - cron: "0 10 * * *"
+    # Runs at 03:30 UTC (~8 AM Israel/local)
+    - cron: "30 3 * * *"
   workflow_dispatch:
     inputs:
       date:

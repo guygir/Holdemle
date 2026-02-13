@@ -55,10 +55,10 @@ export function ResultsDisplay({
           : "Better luck next time!"}
       </h2>
 
-      {/* LOSS/Guesses/Time - ABOVE Correct */}
-      <div className="flex flex-wrap gap-x-4 sm:gap-x-8 gap-y-2 text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a1b]">
-        <span>
-          {isSolved ? "WIN" : "LOSS"}
+      {/* LOSS/WON/Guesses/Time - ABOVE Correct */}
+      <div className="flex flex-wrap gap-x-4 sm:gap-x-8 gap-y-2 text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold">
+        <span className={isSolved ? "text-[#6aaa64]" : "text-[#dc2626]"}>
+          {isSolved ? "WON" : "LOSS"}
         </span>
         <span className="text-gray-600 font-semibold">
           Guesses: {guessesUsed}/{MAX_GUESSES}
