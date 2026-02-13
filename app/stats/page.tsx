@@ -67,7 +67,7 @@ export default function StatsPage() {
         <div>
           <p className="text-red-600 mb-4">{error}</p>
           <Link
-            href="/auth/login"
+            href="/auth/login?redirect=/stats"
             className="text-[#6aaa64] hover:underline min-h-[44px] inline-flex items-center"
           >
             Login to view stats

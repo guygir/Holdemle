@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+# If lib/version.json is staged, sync to README and add it
+if git diff --cached --name-only | grep -q '^lib/version\.json$'; then
+  npm run version:sync
+  git add README.md
+fi

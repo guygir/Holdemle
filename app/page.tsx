@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import versionData from "@/lib/version.json";
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -95,7 +96,11 @@ export default async function Home() {
           </a>
           <div>
             <p className="text-xs sm:text-base lg:text-lg text-gray-500">📊 Latest Updates</p>
-            <p className="text-xs sm:text-base lg:text-lg text-gray-600 mt-0.5 sm:mt-1">v1.0 - We&apos;re live!</p>
+            <ul className="text-xs sm:text-base lg:text-lg text-gray-600 mt-0.5 sm:mt-1 list-none p-0">
+              {(versionData.updates as Array<{ version: string; note: string }>).map((u) => (
+                <li key={u.version}>v{u.version} - {u.note}</li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

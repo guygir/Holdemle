@@ -3,11 +3,12 @@
 import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSafeRedirect } from "@/lib/auth/redirect";
 
 function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = useMemo(
-    () => searchParams.get("redirect") || "/game",
+    () => getSafeRedirect(searchParams.get("redirect")),
     [searchParams]
   );
   const [nickname, setNickname] = useState("");

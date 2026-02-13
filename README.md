@@ -2,6 +2,13 @@
 
 A daily poker puzzle game inspired by Wordle. Guess the pre-flop winning percentages of 4 poker hands!
 
+## 📊 Latest Updates
+
+<!-- VERSION_SECTION - Do not edit manually; run `npm run version:sync` to update from lib/version.json -->
+- v1.1b - Test
+- v1.0 - We're live!
+<!-- VERSION_SECTION_END -->
+
 ## Quick Start
 
 ### 1. Install dependencies
@@ -94,6 +101,16 @@ poker-wordle/
 ├── scripts/          # Puzzle generation
 └── supabase/         # Database migrations
 ```
+
+## Version Updates
+
+To release a new version:
+
+1. Edit `lib/version.json` — add an entry to `updates` and bump `version` if desired.
+2. Commit — the pre-commit hook automatically runs `version:sync` and stages README.md when `lib/version.json` is committed.
+3. Push.
+
+CI verifies the sync; if README is out of sync, the build fails.
 
 ## Documentation
 

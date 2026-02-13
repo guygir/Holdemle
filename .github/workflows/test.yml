@@ -26,3 +26,11 @@ jobs:
 
       - name: Test
         run: npm run test:ci
+
+      - name: Verify version sync
+        run: |
+          npm run version:sync
+          if ! git diff --exit-code README.md > /dev/null; then
+            echo "::error::README.md is out of sync with lib/version.json. Run 'npm run version:sync' and commit README.md"
+            exit 1
+          fi
