@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getUseDemo } from "@/lib/demo-mode";
+import { getCurrentPuzzleDate } from "@/lib/puzzle";
 import { validateGuesses } from "@/lib/utils/validation";
 import { calculateScore } from "@/lib/utils/scoring";
 import { MAX_GUESSES } from "@/lib/game-config";
@@ -168,10 +169,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const today = new Date().toISOString().split("T")[0];
-  if (puzzle.puzzle_date !== today) {
+  const currentDate = await getCurrentPuzzleDate(supabase);
+  if (!currentDate || puzzle.puzzle_date !== currentDate) {
     return NextResponse.json(
-      { success: false, error: "Can only submit for today's puzzle" },
+      { success: false, error: "Can only submit for the current puzzle" },
       { status: 400 }
     );
   }

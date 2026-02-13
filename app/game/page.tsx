@@ -245,7 +245,7 @@ function GameContent() {
   }
 
   if (error) {
-    const isPuzzleComing = error === "No puzzle for today";
+    const isPuzzleComing = error === "No puzzle for today" || error?.includes("Today's puzzle is coming up shortly");
     return (
       <main className="min-h-screen flex flex-col items-center justify-center p-6">
         {isPuzzleComing ? (
@@ -345,7 +345,7 @@ function GameContent() {
               Demo
             </span>
           ) : (
-            new Date(puzzle.date).toLocaleDateString()
+            <>Puzzle date: {new Date(puzzle.date).toLocaleDateString()}</>
           )}
           </span>
         </div>

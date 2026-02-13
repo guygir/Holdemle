@@ -122,11 +122,23 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const { getCurrentPuzzleDate } = await import("@/lib/puzzle");
+  const currentDate = await getCurrentPuzzleDate(adminSupabase);
+  if (!currentDate) {
+    return NextResponse.json({
+      success: true,
+      data: {
+        type: "daily",
+        entries: [],
+        userRank: undefined,
+        isDemoMode: false,
+      },
+    });
+  }
   const { data: puzzle } = await adminSupabase
     .from("puzzles")
     .select("id")
-    .eq("puzzle_date", today)
+    .eq("puzzle_date", currentDate)
     .single();
 
   if (!puzzle) {

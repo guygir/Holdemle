@@ -2,30 +2,15 @@ import { Hand } from "pokersolver";
 import { createDeck, shuffleDeck } from "./deck";
 
 /**
- * Calculate pre-flop winning percentages for 4 hands.
- * Uses poker-odds-calc exhaustive mode (exact, ~5s) when available.
- * Falls back to Monte Carlo (pokersolver) for other cases.
+ * Calculate pre-flop equity percentages for 4 hands.
+ * Uses Monte Carlo (pokersolver) - 1M iterations in Node for accuracy.
+ * Correctly splits ties (1/numWinners per board).
  */
 export async function calculatePreFlopOdds(
   hands: Array<[string, string]>,
-  iterations: number = 10000
+  iterations: number = 1_000_000
 ): Promise<number[]> {
-  // Prefer poker-odds-calc exhaustive (exact) for exactly 4 hands - only in Node (scripts)
-  if (hands.length === 4 && typeof window === "undefined") {
-    try {
-      const { TexasHoldem } = await import("poker-odds-calc");
-      const table = new TexasHoldem();
-      hands.forEach((h) => table.addPlayer([h[0], h[1]]));
-      table.exhaustive();
-      const result = table.calculate();
-      return result.getPlayers().map((p) => p.getWinsPercentage());
-    } catch {
-      // Fall through to Monte Carlo
-    }
-  }
-
-  // Monte Carlo fallback
-  const wins = new Array(hands.length).fill(0);
+  const equity = new Array(hands.length).fill(0);
   for (let i = 0; i < iterations; i++) {
     const usedCards = hands.flat();
     const deck = shuffleDeck(createDeck(usedCards));
@@ -40,11 +25,11 @@ export async function calculatePreFlopOdds(
 
     winners.forEach((winner) => {
       const idx = handResults.indexOf(winner);
-      wins[idx] += winShare;
+      equity[idx] += winShare;
     });
   }
 
-  return hands.map((_, i) => (wins[i] / iterations) * 100);
+  return hands.map((_, i) => (equity[i] / iterations) * 100);
 }
 
 /**

@@ -63,8 +63,7 @@ See `lib/poker/hand-families.ts` for family definitions and defaults.
 
 ## Percentages & Accuracy
 
-- **poker-odds-calc** (npm): Primary. Exhaustive enumeration of all 1.08M possible boards → **exact** equity. ~5 sec per puzzle.
-- **pokersolver** (npm): Fallback Monte Carlo. Hand evaluation only; we use it when poker-odds-calc isn’t used.
+- **pokersolver** (npm): Monte Carlo 1M iterations for equity. Correctly splits ties. ~60 sec per puzzle.
 - **Demo puzzle**: Exact values (30/38/17/15). Run `node scripts/calc-demo-odds.mjs` to verify.
 
 ## Configuration

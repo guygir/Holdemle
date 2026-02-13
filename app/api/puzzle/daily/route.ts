@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getUseDemo } from "@/lib/demo-mode";
 import { MAX_GUESSES } from "@/lib/game-config";
+import { getCurrentPuzzleDate } from "@/lib/puzzle";
 
 // Demo puzzle - EXACT percentages from poker-odds-calc exhaustive (node scripts/calc-demo-odds.mjs)
 const DEMO_PUZZLE = {
@@ -17,7 +18,6 @@ const DEMO_PUZZLE = {
 };
 
 export async function GET(request: Request) {
-  const today = new Date().toISOString().split("T")[0];
   const isDemoRequest = new URL(request.url).searchParams.get("demo") === "1";
   const useDemo = getUseDemo();
   if (useDemo === "fail") {
@@ -48,26 +48,27 @@ export async function GET(request: Request) {
 
   const supabase = await createServerSupabaseClient();
 
+  const currentDate = await getCurrentPuzzleDate(supabase);
+  if (!currentDate) {
+    return NextResponse.json({
+      success: false,
+      error: "No puzzle available yet. Today's puzzle is coming up shortly!",
+      data: null,
+    });
+  }
+
   const { data: puzzle, error } = await supabase
     .from("puzzles")
     .select("*")
-    .eq("puzzle_date", today)
+    .eq("puzzle_date", currentDate)
     .single();
 
-  if (error && error.code !== "PGRST116") {
+  if (error || !puzzle) {
     console.error("Error fetching puzzle:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch puzzle" },
       { status: 500 }
     );
-  }
-
-  if (!puzzle) {
-    return NextResponse.json({
-      success: false,
-      error: "No puzzle for today",
-      data: null,
-    });
   }
 
   const user = (await supabase.auth.getUser()).data.user;

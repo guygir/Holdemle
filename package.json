@@ -9,6 +9,7 @@
     "lint": "next lint",
     "generate-puzzles": "tsx scripts/generate-puzzles.ts",
     "calc-demo-odds": "node scripts/calc-demo-odds.mjs",
+    "compare-equity": "tsx scripts/compare-equity-methods.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ci": "vitest run"
@@ -18,6 +19,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "next": "^14.2.0",
     "poker-odds-calc": "^0.0.14",
+    "poker-odds-calculator": "^0.4.0",
     "pokersolver": "^2.1.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
