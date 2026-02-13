@@ -1,7 +1,6 @@
 {
-  "version": "1.1b",
+  "version": "1.0",
   "updates": [
-    { "version": "1.1b", "note": "Test" },
     { "version": "1.0", "note": "We're live!" }
   ]
 }
