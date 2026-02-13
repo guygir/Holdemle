@@ -51,11 +51,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const supabase = await createServerSupabaseClient();
+
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .ilike("nickname", trimmed)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Nickname is already taken" },
+        { status: 400 }
+      );
+    }
+
     const slug = slugify(trimmed);
     const domain = process.env.AUTH_EMAIL_DOMAIN || "holdemle.invalid";
     const authEmail = `${slug}_${generateShortId()}@${domain}`;
-
-    const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.auth.signUp({
       email: authEmail,
       password,
