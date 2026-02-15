@@ -79,47 +79,50 @@ export default function LeaderboardPage() {
 
       <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Leaderboard</h1>
 
-      <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-4">
+      <div className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-4">
         <button
           onClick={() => setType("daily")}
-          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+          className={`self-start min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
             type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
           }`}
         >
           Today
         </button>
-        <button
-          onClick={() => setType("alltime-wins")}
-          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
-          }`}
-        >
-          All Time Wins
-        </button>
-        <button
-          onClick={() => setType("alltime-winpct")}
-          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
-          }`}
-        >
-          All Time Win %
-        </button>
-        <button
-          onClick={() => setType("alltime-avgguesses")}
-          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
-          }`}
-        >
-          All Time Avg Guesses
-        </button>
-        <button
-          onClick={() => setType("alltime-avgdiff")}
-          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
-          }`}
-        >
-          All Time Avg Diff
-        </button>
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span className="text-xs sm:text-sm text-gray-600 mr-0.5">All Time, filtered by:</span>
+          <button
+            onClick={() => setType("alltime-wins")}
+            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+              type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+            }`}
+          >
+            Wins
+          </button>
+          <button
+            onClick={() => setType("alltime-winpct")}
+            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+              type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+            }`}
+          >
+            Win %
+          </button>
+          <button
+            onClick={() => setType("alltime-avgguesses")}
+            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+              type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+            }`}
+          >
+            Avg Guesses
+          </button>
+          <button
+            onClick={() => setType("alltime-avgdiff")}
+            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+              type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+            }`}
+          >
+            Avg Diff
+          </button>
+        </div>
       </div>
 
       {loading ? (
