@@ -46,6 +46,9 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     setLoading(true);
+    setEntries([]);
+    setUserRank(undefined);
+
     const apiType = type === "daily" ? "daily" : type;
     fetch(`/api/leaderboard?type=${apiType}`)
       .then((r) => r.json())
