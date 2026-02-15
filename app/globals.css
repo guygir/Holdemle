@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Normalize text scaling across Chrome, Safari, etc. */
-html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
 /* Responsive base font: smaller on mobile, larger on desktop */
 html {
   font-size: 87.5%; /* ~14px on mobile - compact */
@@ -21,7 +15,6 @@ html {
 @media (min-width: 1280px) {
   html { font-size: 125%; }
 }
-
 
 :root {
   --color-exact: #6aaa64;
@@ -37,9 +30,4 @@ html {
 body {
   color: var(--color-text);
   background: var(--color-background);
-}
-
-/* Chrome zoom 0.5: main needs 200vh so scaled content fills 100vh, footer stays at bottom */
-.viewport-swap-wrapper.chrome-zoom-active main {
-  min-height: 200vh;
 }

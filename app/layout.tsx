@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { ViewportSwap } from "@/components/ViewportSwap";
 
 export const metadata: Metadata = {
   title: "Hold'emle - Texas Hold'em Daily Puzzle",
@@ -21,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased min-h-screen bg-white text-[#1a1a1b] text-sm sm:text-base lg:text-lg">
-        <ViewportSwap>{children}</ViewportSwap>
+        {children}
       </body>
     </html>
   );

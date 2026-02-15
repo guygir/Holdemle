@@ -389,8 +389,8 @@ function GameContent() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col flex-1 min-h-0 gap-2 sm:gap-4">
-          <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex flex-col max-h-[48vh] shrink-0 overflow-y-auto">
           <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
             <Timer startTime={startTime} className="font-mono text-xs sm:text-base lg:text-xl" />
@@ -483,7 +483,7 @@ function GameContent() {
           )}
           </div>
 
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div className="mt-2 sm:mt-4 flex-1 min-h-0 flex flex-col">
             <button
               onClick={handleSubmit}
               disabled={total !== 100 || submitting}
