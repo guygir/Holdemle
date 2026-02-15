@@ -5,7 +5,7 @@ import { getUseDemo } from "@/lib/demo-mode";
 import { sortDailyLeaderboard } from "@/lib/utils/leaderboard-sort";
 import {
   countWins,
-  getAverageGuessesFromSolvedDistribution,
+  getAverageGuessesIncludingLosses,
 } from "@/lib/utils/solved-distribution";
 
 export async function GET(request: NextRequest) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        type: type as "daily" | "alltime",
+        type,
         entries: [],
         userRank: undefined,
         isDemoMode: true,
@@ -53,31 +53,96 @@ export async function GET(request: NextRequest) {
   const supabase = await createServerSupabaseClient();
   const user = (await supabase.auth.getUser()).data.user;
 
-  if (type === "alltime") {
-    const { data: stats } = await adminSupabase
+  const allTimeTypes = [
+    "alltime",
+    "alltime-wins",
+    "alltime-winpct",
+    "alltime-avgguesses",
+    "alltime-avgdiff",
+  ];
+  if (allTimeTypes.includes(type)) {
+    const { MAX_GUESSES: maxGuesses } = await import("@/lib/game-config");
+
+    const { data: stats, error: statsError } = await adminSupabase
       .from("user_stats")
       .select(
-        "user_id, total_games, solved_distribution, failed_games, average_guesses, average_percent_diff, total_score"
+        "user_id, total_games, solved_distribution, failed_games, average_percent_diff, total_score"
       );
+
+    if (statsError) {
+      console.error("Leaderboard user_stats fetch error:", statsError);
+      return NextResponse.json({
+        success: true,
+        data: { type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff", entries: [], userRank: undefined, isDemoMode: false },
+      });
+    }
 
     const getWins = (s: { solved_distribution?: Record<string, number> }) =>
       countWins(s.solved_distribution);
-    const getAvgGuesses = (s: { solved_distribution?: Record<string, number> }) =>
-      getAverageGuessesFromSolvedDistribution(s.solved_distribution);
-    const sorted = (stats ?? [])
-      .filter((s) => (s.total_games ?? 0) > 0)
-      .sort((a, b) => {
-        const winsA = getWins(a);
-        const winsB = getWins(b);
-        if (winsB !== winsA) return winsB - winsA;
-        const avgA = getAvgGuesses(a) || 999;
-        const avgB = getAvgGuesses(b) || 999;
-        if (avgA !== avgB) return avgA - avgB;
-        const diffA = a.average_percent_diff ?? 999;
-        const diffB = b.average_percent_diff ?? 999;
-        return diffA - diffB;
-      })
-      .slice(0, limit);
+    const getAvgGuesses = (
+      s: {
+        solved_distribution?: Record<string, number>;
+        failed_games?: number;
+        total_games?: number;
+      }
+    ) =>
+      getAverageGuessesIncludingLosses(
+        s.solved_distribution,
+        s.failed_games ?? 0,
+        s.total_games ?? 0,
+        maxGuesses
+      );
+    const getWinPct = (
+      s: { total_games?: number; failed_games?: number }
+    ) => {
+      const total = s.total_games ?? 0;
+      if (total === 0) return 0;
+      return ((total - (s.failed_games ?? 0)) / total) * 100;
+    };
+
+    type SortFn = (a: (typeof stats)[number], b: (typeof stats)[number]) => number;
+    const sortWins: SortFn = (a, b) => {
+      const winsA = getWins(a);
+      const winsB = getWins(b);
+      if (winsB !== winsA) return winsB - winsA;
+      const avgA = getAvgGuesses(a) || 999;
+      const avgB = getAvgGuesses(b) || 999;
+      if (avgA !== avgB) return avgA - avgB;
+      const diffA = a.average_percent_diff ?? 999;
+      const diffB = b.average_percent_diff ?? 999;
+      return diffA - diffB;
+    };
+    const sortWinPct: SortFn = (a, b) => {
+      const pctA = getWinPct(a);
+      const pctB = getWinPct(b);
+      if (pctB !== pctA) return pctB - pctA;
+      return sortWins(a, b);
+    };
+    const sortAvgGuesses: SortFn = (a, b) => {
+      const avgA = getAvgGuesses(a) ?? 999;
+      const avgB = getAvgGuesses(b) ?? 999;
+      if (avgA !== avgB) return avgA - avgB;
+      return sortWins(a, b);
+    };
+    const sortAvgDiff: SortFn = (a, b) => {
+      const diffA = a.average_percent_diff ?? 999;
+      const diffB = b.average_percent_diff ?? 999;
+      if (diffA !== diffB) return diffA - diffB;
+      return sortWins(a, b);
+    };
+
+    const sortFn =
+      type === "alltime-winpct"
+        ? sortWinPct
+        : type === "alltime-avgguesses"
+          ? sortAvgGuesses
+          : type === "alltime-avgdiff"
+            ? sortAvgDiff
+            : sortWins;
+
+    const filtered = (stats ?? []).filter((s) => (s.total_games ?? 0) > 0);
+    const sorted = [...filtered].sort(sortFn).slice(0, limit);
+    const fullSorted = [...filtered].sort(sortFn);
 
     const userIds = sorted.map((s) => s.user_id);
     const { data: profiles } = userIds.length
@@ -94,31 +159,25 @@ export async function GET(request: NextRequest) {
         username: displayName,
         wins: getWins(s),
         totalGames: s.total_games,
+        winPercent: getWinPct(s),
         averageGuesses: getAvgGuesses(s),
         averagePercentDiff: parseFloat(String(s.average_percent_diff ?? 0)),
         totalScore: s.total_score,
       };
     });
 
-    const fullSorted = (stats ?? []).filter((s) => (s.total_games ?? 0) > 0)
-      .sort((a, b) => {
-        const winsA = getWins(a);
-        const winsB = getWins(b);
-        if (winsB !== winsA) return winsB - winsA;
-        const avgA = getAvgGuesses(a) || 999;
-        const avgB = getAvgGuesses(b) || 999;
-        if (avgA !== avgB) return avgA - avgB;
-        const diffA = a.average_percent_diff ?? 999;
-        const diffB = b.average_percent_diff ?? 999;
-        return diffA - diffB;
-      });
     const userRank = user
       ? (fullSorted.findIndex((s) => s.user_id === user.id) + 1) || undefined
       : undefined;
 
     return NextResponse.json({
       success: true,
-      data: { type: "alltime", entries, userRank, isDemoMode: false },
+      data: {
+        type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff",
+        entries,
+        userRank,
+        isDemoMode: false,
+      },
     });
   }
 
@@ -153,12 +212,16 @@ export async function GET(request: NextRequest) {
     });
   }
 
+  const { MAX_GUESSES } = await import("@/lib/game-config");
+
   const { data: guesses } = await adminSupabase
     .from("guesses")
     .select("user_id, is_solved, guesses_used, time_taken_seconds, percent_diff, submitted_at")
     .eq("puzzle_id", puzzle.id);
 
-  const completed = (guesses ?? []).filter((g) => g.guesses_used > 0);
+  const completed = (guesses ?? []).filter(
+    (g) => g.guesses_used > 0 && (g.is_solved || g.guesses_used >= MAX_GUESSES)
+  );
   const sorted = sortDailyLeaderboard(completed);
   const limited = sorted.slice(0, limit);
   const userIds = limited.map((g) => g.user_id);

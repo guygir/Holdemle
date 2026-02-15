@@ -28,6 +28,24 @@ export function getAverageGuessesFromSolvedDistribution(
   return sum / wins;
 }
 
+/** Average guesses across all games (including losses as maxGuesses each). */
+export function getAverageGuessesIncludingLosses(
+  dist: SolvedDistribution | null | undefined,
+  failedGames: number,
+  totalGames: number,
+  maxGuesses: number
+): number {
+  if (totalGames === 0) return 0;
+  let solvedSum = 0;
+  for (const [n, count] of Object.entries(dist ?? {})) {
+    const guesses = parseInt(n, 10);
+    if (!isNaN(guesses) && typeof count === "number") {
+      solvedSum += guesses * count;
+    }
+  }
+  return (solvedSum + failedGames * maxGuesses) / totalGames;
+}
+
 /** Increment count for guessesUsed; returns new distribution */
 export function incrementSolved(
   dist: SolvedDistribution | null | undefined,

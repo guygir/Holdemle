@@ -21,12 +21,15 @@ interface DailyEntry {
   submittedAt?: string;
 }
 
+type AllTimeTab = "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff";
+
 interface AllTimeEntry {
   rank: number;
   userId: string;
   username: string;
   wins: number;
   totalGames: number;
+  winPercent: number;
   averageGuesses: number;
   averagePercentDiff: number;
   totalScore: number;
@@ -36,21 +39,26 @@ type LeaderboardEntry = DailyEntry | AllTimeEntry;
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [type, setType] = useState<"daily" | "alltime">("daily");
+  const [type, setType] = useState<"daily" | AllTimeTab>("daily");
   const [userRank, setUserRank] = useState<number | undefined>();
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/leaderboard?type=${type}`)
+    const apiType = type === "daily" ? "daily" : type;
+    fetch(`/api/leaderboard?type=${apiType}`)
       .then((r) => r.json())
       .then((json) => {
-        if (json.success) {
-          setEntries(json.data.entries);
+        if (json.success && json.data) {
+          setEntries(json.data.entries ?? []);
           setUserRank(json.data.userRank);
           setIsDemoMode(json.data.isDemoMode ?? false);
         }
+      })
+      .catch(() => {
+        setEntries([]);
+        setUserRank(undefined);
       })
       .finally(() => setLoading(false));
   }, [type]);
@@ -71,22 +79,46 @@ export default function LeaderboardPage() {
 
       <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Leaderboard</h1>
 
-      <div className="flex gap-1 sm:gap-2 mb-2 sm:mb-4">
+      <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-4">
         <button
           onClick={() => setType("daily")}
-          className={`min-h-[36px] sm:min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-base lg:text-lg rounded-lg font-medium [touch-action:manipulation] ${
+          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
             type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
           }`}
         >
           Today
         </button>
         <button
-          onClick={() => setType("alltime")}
-          className={`min-h-[36px] sm:min-h-[40px] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-base lg:text-lg rounded-lg font-medium [touch-action:manipulation] ${
-            type === "alltime" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+          onClick={() => setType("alltime-wins")}
+          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+            type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
           }`}
         >
-          All Time
+          All Time Wins
+        </button>
+        <button
+          onClick={() => setType("alltime-winpct")}
+          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+            type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+          }`}
+        >
+          All Time Win %
+        </button>
+        <button
+          onClick={() => setType("alltime-avgguesses")}
+          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+            type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+          }`}
+        >
+          All Time Avg Guesses
+        </button>
+        <button
+          onClick={() => setType("alltime-avgdiff")}
+          className={`min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
+            type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+          }`}
+        >
+          All Time Avg Diff
         </button>
       </div>
 
@@ -96,7 +128,9 @@ export default function LeaderboardPage() {
         <p className="text-gray-600 text-xs sm:text-base lg:text-xl">
           {isDemoMode
             ? "Login and play to see the leaderboard."
-            : "No entries yet. Be the first to complete today's puzzle!"}
+            : type === "daily"
+              ? "No entries yet. Be the first to complete today's puzzle!"
+              : "No entries yet. Play some games to appear on the leaderboard."}
         </p>
       ) : (
         <div className="space-y-2 sm:space-y-3">
@@ -140,6 +174,7 @@ export default function LeaderboardPage() {
                     <span className="font-medium text-[#1a1a1b]">
                       Wins: {(e as AllTimeEntry).wins} / Games: {(e as AllTimeEntry).totalGames}
                     </span>
+                    <span>Win %: {((e as AllTimeEntry).winPercent ?? 0).toFixed(0)}%</span>
                     <span>
                       Avg guesses: {((e as AllTimeEntry).averageGuesses ?? 0).toFixed(1)}
                     </span>

@@ -22,7 +22,7 @@ npm install
 npm run dev
 ```
 
-Visit http://localhost:3000. The game runs with a built-in demo puzzle. **Note:** In demo mode, you must be logged in to submit guesses. Create an account or use a Supabase project to persist scores.
+Visit http://localhost:3000. The game runs with a built-in demo puzzle. You can play and submit without logging in. Create an account and set up Supabase to save scores and play daily puzzles.
 
 ### 3. Set up Supabase (for full features)
 
@@ -45,50 +45,40 @@ CRON_SECRET=your_cron_secret
 ```
 
 4. Run database migrations in order (Supabase SQL Editor or `npx supabase db push`):
-   - `001_initial_schema.sql`
-   - `002_leaderboard_metrics.sql` (adds percent_diff)
-   - `003_solved_distribution_jsonb.sql` (replaces solved_in_1/2/3 with flexible JSONB)
+   - `001_initial_schema.sql` … `011_nickname_unique_error_no_suffix.sql` (run all in `supabase/migrations/`)
 
-5. Generate puzzles:
+5. Daily puzzles: A GitHub Actions workflow runs at 03:30 UTC and creates/replaces today's puzzle. After deploy, manually trigger "Replace Daily Puzzle" once, or wait for the schedule.
 
-```bash
-npx tsx scripts/generate-puzzles.ts
-```
-
-To generate 90 days of puzzles:
-```bash
-PUZZLE_DAYS=90 npx tsx scripts/generate-puzzles.ts
-```
-
-**Hand family weights** (optional `HAND_FAMILY_WEIGHTS` JSON for puzzle variety):
-```bash
-# Custom weights - families: all_ax, k4s_k6o, q6s_q8o, j8s_j10o, connectors, suited_one_gappers, pocket_pairs, random
-HAND_FAMILY_WEIGHTS='{"pocket_pairs":25,"connectors":20}' npx tsx scripts/generate-puzzles.ts
-```
-See `lib/poker/hand-families.ts` for family definitions and defaults.
+   **Optional** — pre-generate many days locally:
+   ```bash
+   npx tsx scripts/generate-puzzles.ts
+   # Or: PUZZLE_DAYS=90 npx tsx scripts/generate-puzzles.ts
+   ```
+   Hand family weights (optional): `HAND_FAMILY_WEIGHTS='{"pocket_pairs":25}'` — see `lib/poker/hand-families.ts`.
 
 ## Percentages & Accuracy
 
-- **pokersolver** (npm): Monte Carlo 1M iterations for equity. Correctly splits ties. ~60 sec per puzzle.
-- **Demo puzzle**: Exact values (30/38/17/15). Run `node scripts/calc-demo-odds.mjs` to verify.
+- **Puzzle generation** (cron + script): Uses `pokersolver` with Monte Carlo 1M iterations for equity. Correctly splits ties.
+- **Demo puzzle**: Fixed values (30/38/17/15). Run `npm run calc-demo-odds` to verify.
 
 ## Configuration
 
-- **MAX_GUESSES** (in `lib/game-config.ts`): Default 3. Change here to allow more guesses; stats and leaderboards scale automatically via `solved_distribution` JSONB.
+- **MAX_GUESSES** (in `lib/game-config.ts`): Currently 5. Change here to adjust; stats and leaderboards scale via `solved_distribution` JSONB.
 
 ## Features
 
-- **Daily puzzle**: 4 poker hands, guess the win percentages
-- **Configurable guesses**: Wordle-style with color feedback (🟢 exact, 🔵 too high, 🟡 too low)
+- **Daily puzzle**: 4 poker hands, guess the pre-flop win percentages
+- **5 guesses**: Wordle-style with color feedback (🟩 exact, 🟦 too high, 🟧 too low)
 - **Scoring**: Based on guesses used + time bonus
 - **Leaderboards**: Daily and all-time
 - **User stats**: Streaks, solve rates, history
+- **Auth**: Nickname + password (no email required)
 
 ## Tech Stack
 
 - Next.js 14, TypeScript, Tailwind CSS
 - Supabase (Auth, PostgreSQL)
-- pokersolver for hand evaluation
+- pokersolver for hand evaluation (Monte Carlo equity)
 
 ## Project Structure
 
@@ -96,9 +86,10 @@ See `lib/poker/hand-families.ts` for family definitions and defaults.
 poker-wordle/
 ├── app/              # Next.js App Router pages
 ├── components/       # React components
-├── lib/              # Poker logic, Supabase, utils
-├── scripts/          # Puzzle generation
-└── supabase/         # Database migrations
+├── lib/              # Poker logic, Supabase, utils, version
+├── scripts/          # Puzzle generation, version sync
+├── supabase/         # Database migrations
+└── .github/          # Workflows (daily puzzle cron, tests)
 ```
 
 ## Version Updates
@@ -113,4 +104,4 @@ CI verifies the sync; if README is out of sync, the build fails.
 
 ## Documentation
 
-See `POKER_WORDLE_COMPLETE_GUIDE.md` and `POKER_WORDLE_QUICK_START.md` in the project root for full documentation.
+See `DEPLOYMENT_CHECKLIST.md` for the full deployment guide (Supabase → GitHub → Vercel).

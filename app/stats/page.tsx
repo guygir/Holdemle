@@ -17,10 +17,12 @@ interface StatsData {
   currentStreak: number;
   maxStreak: number;
   averageGuesses: number;
+  averageGuessesIncludingLosses: number;
+  winPercent: number;
   averagePercentDiff: number;
   lastPlayedDate: string | null;
   recentGames: Array<{
-    date: string;
+    date: string | null;
     guessesUsed: number;
     isSolved: boolean;
     timeInSeconds: number;
@@ -35,15 +37,32 @@ export default function StatsPage() {
 
   useEffect(() => {
     fetch("/api/stats")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const text = await r.text();
+        if (!r.ok) {
+          throw new Error(`Stats request failed: ${r.status}`);
+        }
+        if (!text || !text.trim()) {
+          return { success: false, error: "Empty response" };
+        }
+        try {
+          return JSON.parse(text) as { success: boolean; data?: StatsData; error?: string };
+        } catch {
+          console.error("Stats response is not valid JSON:", text.slice(0, 200));
+          return { success: false, error: "Invalid response" };
+        }
+      })
       .then((json) => {
-        if (json.success) {
+        if (json.success && json.data) {
           setStats(json.data);
         } else {
           setError(json.error || "Failed to load stats");
         }
       })
-      .catch(() => setError("Failed to load stats"))
+      .catch((err) => {
+        console.error("Stats fetch error:", err);
+        setError("Failed to load stats");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -75,16 +94,16 @@ export default function StatsPage() {
         </div>
       ) : stats ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-2 sm:gap-4">
-            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+          <div className="flex w-full gap-2 sm:gap-4">
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
               <p className="text-xs sm:text-sm lg:text-base text-gray-600">Total Games</p>
               <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.totalGames}</p>
             </div>
-            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
               <p className="text-xs sm:text-sm lg:text-base text-gray-600">Current Streak</p>
               <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.currentStreak}</p>
             </div>
-            <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
               <p className="text-xs sm:text-sm lg:text-base text-gray-600">Max Streak</p>
               <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.maxStreak}</p>
             </div>
@@ -133,25 +152,30 @@ export default function StatsPage() {
             </div>
           </div>
 
-          <div className="space-y-2">
-            {stats.averagePercentDiff > 0 && (
-              <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff</p>
+          {stats.totalGames > 0 && (
+            <div className="flex w-full gap-2 sm:gap-3">
+              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Win %</p>
                 <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
-                  {stats.averagePercentDiff.toFixed(1)}
+                  {stats.winPercent.toFixed(0)}%
                 </p>
               </div>
-            )}
-
-            {stats.totalGames > 0 && (
-              <div className="p-2 sm:p-4 bg-[#f6f7f8] rounded-lg">
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Average guesses to solve</p>
+              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Average Guesses</p>
                 <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
-                  {stats.averageGuesses.toFixed(1)}
+                  {stats.averageGuessesIncludingLosses.toFixed(1)}
                 </p>
               </div>
-            )}
-          </div>
+              {stats.averagePercentDiff > 0 && (
+                <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
+                  <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff</p>
+                  <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+                    {stats.averagePercentDiff.toFixed(1)}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {stats.recentGames.length > 0 && (
             <div>
@@ -168,7 +192,9 @@ export default function StatsPage() {
                       </span>
                       , Guesses: {g.guessesUsed}/{MAX_GUESSES}, Time: {formatTime(g.timeInSeconds)}, Diff: Δ{g.percentDiff.toFixed(0)}%
                     </p>
-                    <p className="text-xs sm:text-sm text-gray-500">{g.date}</p>
+                    {g.date && (
+                      <p className="text-xs sm:text-sm text-gray-500">{g.date}</p>
+                    )}
                   </div>
                 ))}
               </div>

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getUseDemo } from "@/lib/demo-mode";
-import { getAverageGuessesFromSolvedDistribution } from "@/lib/utils/solved-distribution";
+import {
+  getAverageGuessesFromSolvedDistribution,
+  getAverageGuessesIncludingLosses,
+} from "@/lib/utils/solved-distribution";
+import { MAX_GUESSES } from "@/lib/game-config";
 
 export async function GET() {
   const useDemo = getUseDemo();
@@ -24,6 +28,8 @@ export async function GET() {
         currentStreak: 0,
         maxStreak: 0,
         averageGuesses: 0,
+        averageGuessesIncludingLosses: 0,
+        winPercent: 0,
         averagePercentDiff: 0,
         lastPlayedDate: null,
         recentGames: [],
@@ -68,7 +74,7 @@ export async function GET() {
   );
 
   const recentGames = completedGuesses.map((g) => ({
-    date: puzzleMap[g.puzzle_id],
+    date: puzzleMap[g.puzzle_id] ?? (g.submitted_at ? g.submitted_at.split("T")[0] : null),
     guessesUsed: g.guesses_used,
     isSolved: g.is_solved,
     timeInSeconds: g.time_taken_seconds ?? 0,
@@ -77,16 +83,25 @@ export async function GET() {
 
   const solvedDist =
     (stats?.solved_distribution as Record<string, number>) ?? {};
+  const totalGames = stats?.total_games ?? 0;
+  const failedGames = stats?.failed_games ?? 0;
 
   return NextResponse.json({
     success: true,
     data: {
-      totalGames: stats?.total_games ?? 0,
+      totalGames,
       solvedDistribution: solvedDist,
-      failedGames: stats?.failed_games ?? 0,
+      failedGames,
       currentStreak: stats?.current_streak ?? 0,
       maxStreak: stats?.max_streak ?? 0,
       averageGuesses: getAverageGuessesFromSolvedDistribution(solvedDist),
+      averageGuessesIncludingLosses: getAverageGuessesIncludingLosses(
+        solvedDist,
+        failedGames,
+        totalGames,
+        MAX_GUESSES
+      ),
+      winPercent: totalGames > 0 ? ((totalGames - failedGames) / totalGames) * 100 : 0,
       averagePercentDiff: parseFloat(stats?.average_percent_diff ?? "0") || 0,
       lastPlayedDate: stats?.last_played_date ?? null,
       recentGames,

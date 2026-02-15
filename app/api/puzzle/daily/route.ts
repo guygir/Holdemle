@@ -4,7 +4,7 @@ import { getUseDemo } from "@/lib/demo-mode";
 import { MAX_GUESSES } from "@/lib/game-config";
 import { getCurrentPuzzleDate } from "@/lib/puzzle";
 
-// Demo puzzle - EXACT percentages from poker-odds-calc exhaustive (node scripts/calc-demo-odds.mjs)
+// Demo puzzle - Percentages from pokersolver Monte Carlo 1M (npx tsx scripts/calc-demo-odds-new.ts)
 const DEMO_PUZZLE = {
   id: "demo-puzzle",
   puzzle_date: new Date().toISOString().split("T")[0],
