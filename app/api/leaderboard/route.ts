@@ -100,7 +100,15 @@ export async function GET(request: NextRequest) {
       return ((total - (s.failed_games ?? 0)) / total) * 100;
     };
 
-    type SortFn = (a: (typeof stats)[number], b: (typeof stats)[number]) => number;
+    type StatRow = {
+      user_id: string;
+      total_games?: number;
+      solved_distribution?: Record<string, number>;
+      failed_games?: number;
+      average_percent_diff?: number;
+      total_score?: number;
+    };
+    type SortFn = (a: StatRow, b: StatRow) => number;
     const sortWins: SortFn = (a, b) => {
       const winsA = getWins(a);
       const winsB = getWins(b);
