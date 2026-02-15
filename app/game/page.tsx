@@ -278,8 +278,8 @@ function GameContent() {
   }
 
   return (
-    <div className="flex justify-center w-full">
-      <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
+    <div className="flex justify-center items-center w-full flex-1 min-h-0 flex flex-col">
+      <main className="flex-1 flex flex-col min-h-0 p-2 sm:p-4 w-full max-w-[96vw] gap-0">
       {showTutorial && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
           <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
@@ -334,7 +334,7 @@ function GameContent() {
         </div>
       )}
 
-      <header className="flex flex-col gap-0.5 mb-3 sm:mb-6">
+      <header className="flex flex-col gap-0.5 mb-3 sm:mb-6 shrink-0">
         <div className="flex justify-between items-center min-h-9 sm:min-h-11">
           <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
             🃏 Hold&apos;emle 🃏
@@ -354,8 +354,9 @@ function GameContent() {
         )}
       </header>
 
+      <div className="game-main-content flex flex-col flex-1 min-h-0">
       {isGameOver && puzzle.userGuess ? (
-        <div className="flex flex-col min-h-0">
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           <ResultsDisplay
             guessHistory={puzzle.userGuess.guessHistory}
             hands={puzzle.hands}
@@ -389,8 +390,7 @@ function GameContent() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex flex-col max-h-[48vh] shrink-0 overflow-y-auto">
+        <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
             <Timer startTime={startTime} className="font-mono text-xs sm:text-base lg:text-xl" />
@@ -481,9 +481,8 @@ function GameContent() {
           {submitError && (
             <p className="text-red-600 text-xs sm:text-base lg:text-lg mb-2">{submitError}</p>
           )}
-          </div>
 
-          <div className="mt-2 sm:mt-4 flex-1 min-h-0 flex flex-col">
+          <div className="mt-2 sm:mt-4">
             <button
               onClick={handleSubmit}
               disabled={total !== 100 || submitting}
@@ -492,7 +491,7 @@ function GameContent() {
               {submitting ? "Submitting..." : "Submit Guess"}
             </button>
             {puzzle.userGuess?.guessHistory && puzzle.userGuess.guessHistory.length > 0 && (
-            <div className="mt-2 sm:mt-3 flex-1 min-h-0 overflow-y-auto">
+            <div className="mt-2 sm:mt-3">
               <p className="text-xs sm:text-base lg:text-xl font-medium text-gray-600 mb-1 sm:mb-2">
                 Previous Guesses:
               </p>
@@ -532,8 +531,9 @@ function GameContent() {
           </div>
         </div>
       )}
+      </div>
 
-      <nav className="mt-4 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-base lg:text-xl">
+      <nav className="mt-auto pt-4 sm:pt-6 flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-base lg:text-xl shrink-0">
         <Link href="/leaderboard" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
           Leaderboard
         </Link>

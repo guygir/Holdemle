@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ChromePcZoom } from "@/components/chrome-pc-zoom";
 
 export const metadata: Metadata = {
   title: "Hold'emle - Texas Hold'em Daily Puzzle",
@@ -19,8 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen bg-white text-[#1a1a1b] text-sm sm:text-base lg:text-lg">
-        {children}
+      <body className="antialiased min-h-screen flex flex-col bg-white text-[#1a1a1b] text-sm sm:text-base lg:text-lg">
+        <ChromePcZoom />
+        <div className="app-content flex-1 flex flex-col min-h-0">
+          {children}
+        </div>
       </body>
     </html>
   );

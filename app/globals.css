@@ -31,3 +31,8 @@ body {
   color: var(--color-text);
   background: var(--color-background);
 }
+
+/* Chrome on PC + landscape only - zoom 0.5 on all page content */
+body.chrome-pc-zoom .app-content {
+  zoom: 0.5;
+}
