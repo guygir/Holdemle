@@ -49,11 +49,11 @@ function LoginForm() {
       <div className="max-w-md w-full">
         <Link
           href="/"
-          className="text-base lg:text-lg text-gray-600 hover:text-[#1a1a1b] mb-4 block"
+          className="text-base @lg:text-lg text-gray-600 hover:text-[#1a1a1b] mb-4 block"
         >
           ← Back to Home
         </Link>
-        <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-6">
+        <h1 className="text-2xl @lg:text-3xl font-bold text-[#1a1a1b] mb-6">
           {redirectTo === "/game"
             ? "Sign in to play today's puzzle"
             : "Login to Hold'emle"}
