@@ -3,14 +3,19 @@
  * Secured by CRON_SECRET. Call with: Authorization: Bearer ${CRON_SECRET}
  *
  * Replaces the puzzle for the target date (deletes existing + inserts new).
- * Useful for: daily rotation, manual trigger to refresh today's puzzle.
+ * Scheduled run (no date param): generates for today + 3 days (rolling 3-day buffer).
+ * Manual run: ?date=YYYY-MM-DD to generate for a specific date.
  *
- * Query: ?date=YYYY-MM-DD (optional, defaults to today)
+ * maxDuration: Exhaustive search ~60s; allow up to 5min for cold start + retries.
  */
+export const maxDuration = 300;
 
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { calculatePreFlopOdds, roundToSum100 } from "@/lib/poker/odds-calculator";
+import {
+  calculatePreFlopOddsExhaustive,
+  roundToSum100,
+} from "@/lib/poker/odds-calculator";
 import {
   generateFourHandsWithFamilies,
   DEFAULT_HAND_FAMILY_WEIGHTS,
@@ -65,7 +70,9 @@ export async function GET(request: NextRequest) {
       );
     }
   } else {
-    targetDate = new Date(); // today
+    const today = new Date();
+    targetDate = new Date(today);
+    targetDate.setDate(targetDate.getDate() + 3); // today + 3 (rolling buffer)
   }
   const dateStr = targetDate.toISOString().split("T")[0];
 
@@ -99,7 +106,7 @@ export async function GET(request: NextRequest) {
     for (let attempt = 0; attempt < 50; attempt++) {
       hands = generateFourHandsWithFamilies(weights);
       if (!hands) continue;
-      odds = await calculatePreFlopOdds(hands);
+      odds = calculatePreFlopOddsExhaustive(hands);
       if (odds.every((o) => o >= 5 && o <= 50)) break;
     }
 

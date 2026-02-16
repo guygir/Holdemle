@@ -10,6 +10,7 @@
     "generate-puzzles": "tsx scripts/generate-puzzles.ts",
     "calc-demo-odds": "node scripts/calc-demo-odds.mjs",
     "compare-equity": "tsx scripts/compare-equity-methods.ts",
+    "benchmark-equity": "tsx scripts/benchmark-equity-methods.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ci": "vitest run",

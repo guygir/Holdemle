@@ -2,6 +2,52 @@ import { Hand } from "pokersolver";
 import { createDeck, shuffleDeck } from "./deck";
 
 /**
+ * Calculate pre-flop equity percentages for 4 hands using exhaustive enumeration.
+ * Enumerates all C(44,5) = 1,086,008 possible boards. Exact equity, ~same runtime as 1M Monte Carlo.
+ * Correctly splits ties (1/numWinners per board).
+ */
+export function calculatePreFlopOddsExhaustive(
+  hands: Array<[string, string]>
+): number[] {
+  const usedCards = hands.flat();
+  const deck = createDeck(usedCards);
+  const equity = new Array(hands.length).fill(0);
+  let count = 0;
+
+  const n = deck.length;
+  for (let i0 = 0; i0 < n - 4; i0++) {
+    for (let i1 = i0 + 1; i1 < n - 3; i1++) {
+      for (let i2 = i1 + 1; i2 < n - 2; i2++) {
+        for (let i3 = i2 + 1; i3 < n - 1; i3++) {
+          for (let i4 = i3 + 1; i4 < n; i4++) {
+            const board = [
+              deck[i0],
+              deck[i1],
+              deck[i2],
+              deck[i3],
+              deck[i4],
+            ];
+
+            const handResults = hands.map((holeCards) =>
+              Hand.solve([...holeCards, ...board])
+            );
+            const winners = Hand.winners(handResults);
+            const winShare = 1 / winners.length;
+            winners.forEach((winner) => {
+              const idx = handResults.indexOf(winner);
+              equity[idx] += winShare;
+            });
+            count++;
+          }
+        }
+      }
+    }
+  }
+
+  return hands.map((_, i) => (equity[i] / count) * 100);
+}
+
+/**
  * Calculate pre-flop equity percentages for 4 hands.
  * Uses Monte Carlo (pokersolver) - 1M iterations in Node for accuracy.
  * Correctly splits ties (1/numWinners per board).

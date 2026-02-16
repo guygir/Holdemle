@@ -15,7 +15,10 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 import { createClient } from "@supabase/supabase-js";
-import { calculatePreFlopOdds, roundToSum100 } from "../lib/poker/odds-calculator";
+import {
+  calculatePreFlopOddsExhaustive,
+  roundToSum100,
+} from "../lib/poker/odds-calculator";
 import {
   generateFourHandsWithFamilies,
   DEFAULT_HAND_FAMILY_WEIGHTS,
@@ -91,7 +94,7 @@ async function main() {
 
     do {
       hands = generateFourHands();
-      odds = await calculatePreFlopOdds(hands); // Uses poker-odds-calc exhaustive (exact) for 4 hands
+      odds = calculatePreFlopOddsExhaustive(hands);
       attempts++;
       if (attempts > 50) {
         console.error("Could not generate valid puzzle for", dateStr);
