@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getUseDemo } from "@/lib/demo-mode";
 
@@ -12,8 +12,9 @@ import { getUseDemo } from "@/lib/demo-mode";
  * X axis: days since launch (day 0 = first puzzle_date, last = today).
  * Y axis: number of plays per day.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const useDemo = getUseDemo();
+  const debug = request.nextUrl.searchParams.get("debug") === "1";
   if (useDemo === "fail") {
     return NextResponse.json(
       { success: false, error: "Supabase not configured" },
@@ -68,10 +69,48 @@ export async function GET() {
       return { day, date: p.puzzle_date, plays };
     });
 
-    return NextResponse.json({
-      success: true,
-      data: { launchDate, points },
-    });
+    if (debug) {
+      const { MAX_GUESSES } = await import("@/lib/game-config");
+      const lastPuzzle = puzzles[puzzles.length - 1];
+      const { data: todayRows } = await supabase
+        .from("guesses")
+        .select("user_id, guesses_used, is_solved")
+        .eq("puzzle_id", lastPuzzle.id)
+        .gt("guesses_used", 0);
+      const completedCount = (todayRows ?? []).filter(
+        (g) => g.is_solved || (g.guesses_used ?? 0) >= MAX_GUESSES
+      ).length;
+      const graphValue = playsByPuzzleId.get(lastPuzzle.id) ?? 0;
+      return NextResponse.json(
+        {
+          success: true,
+          debug: {
+            todayUtc: today,
+            lastPuzzleDate: lastPuzzle.puzzle_date,
+            lastPuzzleId: lastPuzzle.id,
+            graphValueToday: graphValue,
+            completedCount,
+            inProgressCount: graphValue - completedCount,
+            totalRowsForToday: todayRows?.length ?? 0,
+            lastFivePoints: points.slice(-5),
+            rows: todayRows ?? [],
+          },
+        },
+        {
+          headers: { "Cache-Control": "no-store, max-age=0", Pragma: "no-cache" },
+        }
+      );
+    }
+
+    return NextResponse.json(
+      { success: true, data: { launchDate, points } },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+          Pragma: "no-cache",
+        },
+      }
+    );
   } catch (err) {
     console.error("Daily plays error:", err);
     return NextResponse.json(

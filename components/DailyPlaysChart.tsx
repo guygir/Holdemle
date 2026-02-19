@@ -47,7 +47,7 @@ export default function DailyPlaysChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/daily-plays")
+    fetch("/api/daily-plays", { cache: "no-store" })
       .then((r) => r.json())
       .then((json) => {
         if (json.success && json.data) setData(json.data);
