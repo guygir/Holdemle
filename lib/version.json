@@ -1,6 +1,7 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "updates": [
-    { "version": "1.0", "note": "We're live!" }
+    { "version": "1.0", "note": "We're live!" },
+    { "version": "1.1", "note": "Suggest a feature button added." }
   ]
 }

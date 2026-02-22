@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
+import SuggestionBox from "@/components/SuggestionBox";
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -59,7 +60,7 @@ export default async function Home() {
                 href="/auth/login"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
-                Sign in / Sign up
+                Sign In / Sign Up
               </Link>
               <Link
                 href="/game?demo=1"
@@ -75,9 +76,10 @@ export default async function Home() {
               </Link>
             </>
           )}
+          <SuggestionBox isLoggedIn={!!user} />
           <Link
             href="/how-to-play"
-            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#f6f7f8] text-[#1a1a1b] font-semibold rounded-lg border border-[#d3d6da] hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
+            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#f6f7f8] text-[#1a1a1b] font-semibold rounded-lg border border-[#d3d6da] hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
           >
             How to Play
           </Link>
