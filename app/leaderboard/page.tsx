@@ -71,32 +71,32 @@ export default function LeaderboardPage() {
       <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
       <header className="flex flex-col gap-0.5 mb-3 sm:mb-6">
         <div className="flex justify-between items-center min-h-9 sm:min-h-11">
-          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] dark:text-gray-100 py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
             🃏 Hold&apos;emle 🃏
           </Link>
-          <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+          <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400 hover:text-[#1a1a1b] dark:hover:text-gray-100 py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center mr-14">
             ← Back
           </Link>
         </div>
       </header>
 
-      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Leaderboard</h1>
+      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">Leaderboard</h1>
 
       <div className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-4">
         <button
           onClick={() => setType("daily")}
           className={`self-start min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+            type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
           }`}
         >
           Today
         </button>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <span className="text-xs sm:text-sm text-gray-600 mr-0.5">All Time, filtered by:</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mr-0.5">All Time, filtered by:</span>
           <button
             onClick={() => setType("alltime-wins")}
             className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+              type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
             }`}
           >
             Wins
@@ -104,7 +104,7 @@ export default function LeaderboardPage() {
           <button
             onClick={() => setType("alltime-winpct")}
             className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+              type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
             }`}
           >
             Win %
@@ -112,7 +112,7 @@ export default function LeaderboardPage() {
           <button
             onClick={() => setType("alltime-avgguesses")}
             className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+              type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
             }`}
           >
             Avg Guesses
@@ -120,7 +120,7 @@ export default function LeaderboardPage() {
           <button
             onClick={() => setType("alltime-avgdiff")}
             className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] border border-[#d3d6da]"
+              type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
             }`}
           >
             Avg Diff
@@ -129,9 +129,9 @@ export default function LeaderboardPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-600 text-xs sm:text-base lg:text-xl">Loading...</p>
+        <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-base lg:text-xl">Loading...</p>
       ) : entries.length === 0 ? (
-        <p className="text-gray-600 text-xs sm:text-base lg:text-xl">
+        <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-base lg:text-xl">
           {isDemoMode
             ? "Login and play to see the leaderboard."
             : type === "daily"
@@ -143,17 +143,17 @@ export default function LeaderboardPage() {
           {entries.map((e) => (
             <div
               key={e.userId + e.rank}
-              className={`flex flex-col gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border border-[#d3d6da] ${
+              className={`flex flex-col gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border border-[#d3d6da] dark:border-gray-600 ${
                 userRank && e.rank === userRank
-                  ? "bg-[#6aaa64]/15 border-2 border-[#6aaa64]"
-                  : "bg-[#f6f7f8]"
+                  ? "bg-[#6aaa64]/15 dark:bg-[#6aaa64]/25 border-2 border-[#6aaa64]"
+                  : "bg-[#f6f7f8] dark:bg-gray-700"
               }`}
             >
-              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-base lg:text-xl">
+              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">
                 <span className="font-semibold shrink-0">#{e.rank}</span>
                 <span className="min-w-0 truncate font-medium">{e.username}</span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-6 gap-y-0 text-xs sm:text-base lg:text-xl text-gray-600">
+              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-6 gap-y-0 text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400">
                 {type === "daily" ? (
                   <>
                     <span
@@ -177,7 +177,7 @@ export default function LeaderboardPage() {
                   </>
                 ) : (
                   <>
-                    <span className="font-medium text-[#1a1a1b]">
+                    <span className="font-medium text-[#1a1a1b] dark:text-gray-200">
                       Wins: {(e as AllTimeEntry).wins} / Games: {(e as AllTimeEntry).totalGames}
                     </span>
                     <span>Win %: {((e as AllTimeEntry).winPercent ?? 0).toFixed(0)}%</span>
@@ -194,7 +194,7 @@ export default function LeaderboardPage() {
       )}
 
       {userRank && (
-        <p className="mt-4 sm:mt-6 text-center text-[#6aaa64] font-medium text-xs sm:text-base lg:text-xl">
+        <p className="mt-4 sm:mt-6 text-center text-[#6aaa64] dark:text-[#7dbb77] font-medium text-xs sm:text-base lg:text-xl">
           Your rank: #{userRank}
         </p>
       )}

@@ -28,7 +28,7 @@ export default function SuggestionBox({ isLoggedIn }: SuggestionBoxProps) {
     return (
       <Link
         href="/auth/login?redirect=/"
-        className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#e8e0f5] text-[#3d2d5c] font-semibold rounded-lg border border-[#c9b8e0] hover:bg-[#ddd2ed] transition-colors [touch-action:manipulation] flex items-center justify-center"
+        className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#e8e0f5] dark:bg-[#4a3d5c] text-[#3d2d5c] dark:text-gray-200 font-semibold rounded-lg border border-[#c9b8e0] dark:border-gray-600 hover:bg-[#ddd2ed] dark:hover:bg-[#5a4d6c] transition-colors [touch-action:manipulation] flex items-center justify-center"
       >
         Suggest a Feature
       </Link>
@@ -45,7 +45,7 @@ export default function SuggestionBox({ isLoggedIn }: SuggestionBoxProps) {
           setText("");
           setErrorMessage("");
         }}
-        className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#e8e0f5] text-[#3d2d5c] font-semibold rounded-lg border border-[#c9b8e0] hover:bg-[#ddd2ed] transition-colors [touch-action:manipulation] flex items-center justify-center"
+        className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#e8e0f5] dark:bg-[#4a3d5c] text-[#3d2d5c] dark:text-gray-200 font-semibold rounded-lg border border-[#c9b8e0] dark:border-gray-600 hover:bg-[#ddd2ed] dark:hover:bg-[#5a4d6c] transition-colors [touch-action:manipulation] flex items-center justify-center"
       >
         Suggest a Feature
       </button>
@@ -61,13 +61,13 @@ export default function SuggestionBox({ isLoggedIn }: SuggestionBoxProps) {
           aria-labelledby="suggestion-title"
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="suggestion-title" className="text-lg font-bold text-[#1a1a1b] mb-3">
+            <h2 id="suggestion-title" className="text-lg font-bold text-[#1a1a1b] dark:text-gray-100 mb-3">
               Suggest a Feature
             </h2>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
               Share your idea (max {MAX_LENGTH} characters). We&apos;ll create a GitHub issue.
             </p>
 
@@ -114,7 +114,7 @@ export default function SuggestionBox({ isLoggedIn }: SuggestionBoxProps) {
                   maxLength={MAX_LENGTH}
                   rows={3}
                   disabled={status === "sending"}
-                  className="w-full px-3 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-[#d3d6da] dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100 focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent resize-none"
                 />
                 <p className="text-xs text-gray-500 mb-4">
                   {text.length}/{MAX_LENGTH}
@@ -124,7 +124,7 @@ export default function SuggestionBox({ isLoggedIn }: SuggestionBoxProps) {
                     type="button"
                     onClick={() => setIsOpen(false)}
                     disabled={status === "sending"}
-                    className="flex-1 py-2 px-4 bg-[#e8e9eb] text-[#1a1a1b] font-semibold rounded-lg hover:bg-[#d3d6da] disabled:opacity-50"
+                    className="flex-1 py-2 px-4 bg-[#e8e9eb] dark:bg-gray-600 text-[#1a1a1b] dark:text-gray-100 font-semibold rounded-lg hover:bg-[#d3d6da] dark:hover:bg-gray-500 disabled:opacity-50"
                   >
                     Cancel
                   </button>

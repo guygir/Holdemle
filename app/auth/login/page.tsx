@@ -48,19 +48,19 @@ function LoginForm() {
     <main className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-md w-full">
         <Link
-          href="/"
-          className="text-base lg:text-lg text-gray-600 hover:text-[#1a1a1b] mb-4 block"
-        >
-          ← Back to Home
+            href="/"
+            className="text-base lg:text-lg text-gray-600 dark:text-gray-400 hover:text-[#1a1a1b] dark:hover:text-gray-100 mb-4 block"
+          >
+            ← Back to Home
         </Link>
-        <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-6">
+        <h1 className="text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100 mb-6">
           Login
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="nickname"
-              className="block text-base font-medium text-gray-700 mb-1"
+              className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
               Nickname
             </label>
@@ -71,13 +71,13 @@ function LoginForm() {
               onChange={(e) => setNickname(e.target.value)}
               placeholder="Your nickname"
               required
-              className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#d3d6da] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent bg-white dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           <div>
             <label
               htmlFor="password"
-              className="block text-base font-medium text-gray-700 mb-1"
+              className="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
               Password
             </label>
@@ -87,7 +87,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-[#d3d6da] rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent"
+              className="w-full px-4 py-2 border border-[#d3d6da] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#6aaa64] focus:border-transparent bg-white dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -99,11 +99,11 @@ function LoginForm() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p className="mt-4 text-center text-gray-600 text-base">
+        <p className="mt-4 text-center text-gray-600 dark:text-gray-400 text-base">
           Don&apos;t have an account?{" "}
           <Link
             href={`/auth/signup${redirectTo !== "/game" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
-            className="text-[#6aaa64] hover:underline"
+            className="text-[#6aaa64] dark:text-[#7dbb77] hover:underline"
           >
             Sign up
           </Link>
@@ -115,7 +115,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="min-h-screen flex items-center justify-center p-6"><p className="text-gray-600">Loading...</p></main>}>
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center p-6"><p className="text-gray-600 dark:text-gray-400">Loading...</p></main>}>
       <LoginForm />
     </Suspense>
   );

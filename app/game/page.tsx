@@ -239,7 +239,7 @@ function GameContent() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center p-6">
-        <p className="text-gray-600">Loading puzzle...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading puzzle...</p>
       </main>
     );
   }
@@ -250,23 +250,23 @@ function GameContent() {
       <main className="min-h-screen flex flex-col items-center justify-center p-6">
         {isPuzzleComing ? (
           <>
-            <p className="text-xl sm:text-2xl font-semibold text-[#1a1a1b] mb-2">
+            <p className="text-xl sm:text-2xl font-semibold text-[#1a1a1b] dark:text-gray-100 mb-2">
               Today&apos;s puzzle is coming up shortly!
             </p>
-            <p className="text-sm text-gray-600 mb-4 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center">
               Check back in a moment. Our daily puzzle will be ready soon.
             </p>
           </>
         ) : (
           <>
             <p className="text-red-600 mb-4">{error}</p>
-            <p className="text-sm text-gray-600 mb-4 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center">
               Make sure you have a puzzle for today. Run the puzzle generation script
               to create puzzles.
             </p>
           </>
         )}
-        <Link href="/" className="mt-4 text-gray-600 hover:text-[#1a1a1b] text-sm">
+        <Link href="/" className="mt-4 text-gray-600 dark:text-gray-400 hover:text-[#1a1a1b] dark:hover:text-gray-100 text-sm">
           ← Back
         </Link>
       </main>
@@ -282,11 +282,11 @@ function GameContent() {
       <main className="flex-1 flex flex-col min-h-0 p-2 sm:p-4 w-full max-w-[96vw] gap-0">
       {showTutorial && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
-          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
-            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-2 sm:mb-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100 mb-2 sm:mb-3">
               How to Play
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 mb-3 sm:mb-4">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
               Guess the pre-flop win percentages for 4 poker hands. Your guesses
               must sum to <strong>100%</strong>. You get{" "}
               <strong>{MAX_GUESSES} guesses</strong>.
@@ -303,14 +303,14 @@ function GameContent() {
 
       {showFeedbackTutorial && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
-          <div className="bg-white rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
-            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] mb-2 sm:mb-3">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
+            <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100 mb-2 sm:mb-3">
               Understanding Feedback
             </h2>
-            <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-2 sm:mb-3">
               Each hand gets color-coded feedback based on your guess:
             </p>
-            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-base lg:text-lg text-gray-700 mb-3 sm:mb-4">
+            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 mb-3 sm:mb-4">
               <li className="flex items-center gap-2">
                 <span className="inline-block w-6 h-6 rounded bg-[#6aaa64] flex-shrink-0" />
                 <strong>Exact</strong> — Your guess matches the actual percentage
@@ -336,10 +336,10 @@ function GameContent() {
 
       <header className="flex flex-col gap-0.5 mb-3 sm:mb-6 shrink-0">
         <div className="flex justify-between items-center min-h-9 sm:min-h-11">
-          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+          <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] dark:text-gray-100 py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
             🃏 Hold&apos;emle 🃏
           </Link>
-          <span className="text-xs sm:text-base lg:text-xl text-gray-600">
+          <span className="text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400 mr-14">
           {isDemoMode ? (
             <span className="bg-[#85c0f9]/20 text-[#85c0f9] px-2 py-0.5 rounded font-medium">
               Demo
@@ -350,7 +350,7 @@ function GameContent() {
           </span>
         </div>
         {puzzle.nickname && !isDemoMode && (
-          <p className="text-xs sm:text-base lg:text-xl text-gray-600">Hello, {puzzle.nickname}</p>
+          <p className="text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400">Hello, {puzzle.nickname}</p>
         )}
       </header>
 
@@ -372,7 +372,7 @@ function GameContent() {
               date={puzzle.date}
               isSolved={puzzle.userGuess.isSolved}
               guessesUsed={puzzle.userGuess.guessesUsed}
-              className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl font-medium px-3 sm:px-4 rounded-lg border border-[#d3d6da] hover:bg-[#e8e9eb]"
+              className="flex-1 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] py-1.5 sm:py-2 lg:py-3 text-sm sm:text-base lg:text-xl font-medium px-3 sm:px-4 rounded-lg border border-[#d3d6da] dark:border-gray-600 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 text-[#1a1a1b] dark:text-gray-100"
             />
             {isDemoMode && (
               <div className="flex-1 flex flex-col gap-2">
@@ -382,7 +382,7 @@ function GameContent() {
                 >
                   Play for Real
                 </Link>
-                <p className="text-center text-xs sm:text-base lg:text-lg text-gray-500">
+                <p className="text-center text-xs sm:text-base lg:text-lg text-gray-500 dark:text-gray-400">
                   Sign up to play daily puzzles and save your scores
                 </p>
               </div>
@@ -391,13 +391,13 @@ function GameContent() {
         </div>
       ) : (
         <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-          <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl">
+          <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
             <Timer startTime={startTime} className="font-mono text-xs sm:text-base lg:text-xl" />
           </div>
 
           <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center">
-            <p className="text-xs sm:text-sm font-medium text-gray-600 text-center mb-1">
+            <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 text-center mb-1">
               Guess each hand&apos;s preflop equity (%)
             </p>
             {puzzle.hands.map((hand) => (
@@ -419,7 +419,7 @@ function GameContent() {
                         [hand.position]: Math.max(0, v - 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-l bg-[#f6f7f8] hover:bg-[#e8e9eb] text-lg sm:text-xl [touch-action:manipulation]"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-l bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
                     aria-label="Decrease by 1"
                   >
                     ↓
@@ -448,7 +448,7 @@ function GameContent() {
                       }
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                    className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border-y border-[#d3d6da] border-x-0 font-semibold [touch-action:manipulation] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] px-1 sm:px-2 py-1 sm:py-2 text-sm sm:text-base lg:text-xl border-y border-[#d3d6da] dark:border-gray-600 border-x-0 font-semibold [touch-action:manipulation] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-white dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100"
                   />
                   <button
                     type="button"
@@ -459,12 +459,12 @@ function GameContent() {
                         [hand.position]: Math.min(100, v + 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] rounded-r bg-[#f6f7f8] hover:bg-[#e8e9eb] text-lg sm:text-xl [touch-action:manipulation]"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-r bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
                     aria-label="Increase by 1"
                   >
                     ↑
                   </button>
-                  <span className="text-sm sm:text-base lg:text-xl">%</span>
+                  <span className="text-sm sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">%</span>
                 </div>
               </div>
             ))}
@@ -472,7 +472,7 @@ function GameContent() {
 
           <p
             className={`text-xs sm:text-base lg:text-xl mb-1 sm:mb-2 ${
-              total === 100 ? "text-[#6aaa64]" : "text-gray-600"
+              total === 100 ? "text-[#6aaa64]" : "text-gray-600 dark:text-gray-400"
             }`}
           >
             Total: {total}% (must equal 100%)
@@ -492,7 +492,7 @@ function GameContent() {
             </button>
             {puzzle.userGuess?.guessHistory && puzzle.userGuess.guessHistory.length > 0 && (
             <div className="mt-2 sm:mt-3">
-              <p className="text-xs sm:text-base lg:text-xl font-medium text-gray-600 mb-1 sm:mb-2">
+              <p className="text-xs sm:text-base lg:text-xl font-medium text-gray-600 dark:text-gray-400 mb-1 sm:mb-2">
                 Previous Guesses:
               </p>
               <div className="space-y-2 sm:space-y-3">
@@ -502,7 +502,7 @@ function GameContent() {
                   );
                   return (
                     <div key={attempt.attempt} className="flex flex-col gap-1">
-                      <p className="text-xs sm:text-sm font-medium text-gray-600">
+                      <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                         Guess {attempt.attempt}:
                       </p>
                       <div className="grid grid-cols-4 gap-1 sm:gap-2">
@@ -534,15 +534,15 @@ function GameContent() {
       </div>
 
       <nav className="mt-auto pt-4 sm:pt-6 flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-base lg:text-xl shrink-0">
-        <Link href="/leaderboard" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
+        <Link href="/leaderboard" className="text-[#6aaa64] dark:text-[#7dbb77] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
           Leaderboard
         </Link>
         {!isDemoMode && (
-          <Link href="/stats" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
+          <Link href="/stats" className="text-[#6aaa64] dark:text-[#7dbb77] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
             Stats
           </Link>
         )}
-        <Link href="/how-to-play" className="text-[#6aaa64] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
+        <Link href="/how-to-play" className="text-[#6aaa64] dark:text-[#7dbb77] hover:underline py-1 sm:py-2 min-h-[32px] sm:min-h-[44px] flex items-center">
           How to Play
         </Link>
       </nav>
@@ -556,7 +556,7 @@ export default function GamePage() {
     <Suspense
       fallback={
         <main className="min-h-screen flex items-center justify-center p-6">
-          <p className="text-gray-600">Loading puzzle...</p>
+          <p className="text-gray-600 dark:text-gray-400">Loading puzzle...</p>
         </main>
       }
     >

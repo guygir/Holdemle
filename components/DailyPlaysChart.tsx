@@ -58,7 +58,7 @@ export default function DailyPlaysChart() {
 
   if (loading || !data || data.points.length === 0) {
     return (
-      <div className="w-full h-36 flex items-center justify-center text-gray-500 text-sm">
+      <div className="w-full h-36 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm">
         {loading ? "Loading chart..." : "No data yet"}
       </div>
     );

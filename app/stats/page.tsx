@@ -70,24 +70,24 @@ export default function StatsPage() {
     <div className="flex justify-center w-full">
       <main className="min-h-screen flex flex-col p-2 sm:p-4 w-full max-w-[96vw]">
       <header className="flex justify-between items-center mb-3 sm:mb-6 min-h-9 sm:min-h-11">
-        <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+        <Link href="/" className="text-base sm:text-lg lg:text-2xl font-bold text-[#1a1a1b] dark:text-gray-100 py-1 -my-1 sm:py-2 sm:-my-2 min-h-[36px] sm:min-h-[44px] flex items-center">
           🃏 Hold&apos;emle 🃏
         </Link>
-        <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 hover:text-[#1a1a1b] py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center">
+        <Link href="/" className="text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400 hover:text-[#1a1a1b] dark:hover:text-gray-100 py-1 sm:py-2 min-h-[36px] sm:min-h-[44px] flex items-center mr-14">
           ← Back
         </Link>
       </header>
 
-      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4">Your Statistics</h1>
+      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">Your Statistics</h1>
 
       {loading ? (
-        <p className="text-gray-600">Loading...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading...</p>
       ) : error ? (
         <div>
           <p className="text-red-600 mb-4">{error}</p>
           <Link
             href="/auth/login?redirect=/stats"
-            className="text-[#6aaa64] hover:underline min-h-[44px] inline-flex items-center"
+            className="text-[#6aaa64] dark:text-[#7dbb77] hover:underline min-h-[44px] inline-flex items-center"
           >
             Login to view stats
           </Link>
@@ -95,22 +95,22 @@ export default function StatsPage() {
       ) : stats ? (
         <div className="space-y-6">
           <div className="flex w-full gap-2 sm:gap-4">
-            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Total Games</p>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.totalGames}</p>
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Total Games</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">{stats.totalGames}</p>
             </div>
-            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Current Streak</p>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.currentStreak}</p>
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Current Streak</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">{stats.currentStreak}</p>
             </div>
-            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-              <p className="text-xs sm:text-sm lg:text-base text-gray-600">Max Streak</p>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold">{stats.maxStreak}</p>
+            <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+              <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Max Streak</p>
+              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">{stats.maxStreak}</p>
             </div>
           </div>
 
           <div>
-            <h2 className="font-semibold mb-2">Solved In</h2>
+            <h2 className="font-semibold mb-2 text-[#1a1a1b] dark:text-gray-100">Solved In</h2>
             <div className="flex items-end gap-1 sm:gap-2" style={{ minHeight: "80px" }}>
               {(() => {
                 const dist = stats.solvedDistribution ?? {};
@@ -154,22 +154,22 @@ export default function StatsPage() {
 
           {stats.totalGames > 0 && (
             <div className="flex w-full gap-2 sm:gap-3">
-              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Win %</p>
-                <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Win %</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">
                   {stats.winPercent.toFixed(0)}%
                 </p>
               </div>
-              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-                <p className="text-xs sm:text-sm lg:text-base text-gray-600">Average Guesses</p>
-                <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+              <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Average Guesses</p>
+                <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">
                   {stats.averageGuessesIncludingLosses.toFixed(1)}
                 </p>
               </div>
               {stats.averagePercentDiff > 0 && (
-                <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] rounded-lg">
-                  <p className="text-xs sm:text-sm lg:text-base text-gray-600">Avg % diff</p>
-                  <p className="text-lg sm:text-2xl lg:text-3xl font-bold">
+                <div className="flex-1 min-w-0 px-2 sm:px-3 py-2 sm:py-4 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg">
+                  <p className="text-xs sm:text-sm lg:text-base text-gray-600 dark:text-gray-400">Avg % diff</p>
+                  <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-[#1a1a1b] dark:text-gray-100">
                     {stats.averagePercentDiff.toFixed(1)}
                   </p>
                 </div>
@@ -179,21 +179,21 @@ export default function StatsPage() {
 
           {stats.recentGames.length > 0 && (
             <div>
-              <h2 className="font-semibold mb-2">Recent Games</h2>
+              <h2 className="font-semibold mb-2 text-[#1a1a1b] dark:text-gray-100">Recent Games</h2>
               <div className="space-y-2">
                 {stats.recentGames.map((g, i) => (
                   <div
                     key={i}
-                    className="p-3 bg-[#f6f7f8] rounded-lg flex flex-col gap-0.5"
+                    className="p-3 bg-[#f6f7f8] dark:bg-gray-700 rounded-lg flex flex-col gap-0.5"
                   >
-                    <p className="text-sm lg:text-base font-medium">
+                    <p className="text-sm lg:text-base font-medium text-[#1a1a1b] dark:text-gray-200">
                       <span className={g.isSolved ? "text-[#6aaa64] font-bold" : "text-[#dc2626] font-bold"}>
                         {g.isSolved ? "WON" : "LOSS"}
                       </span>
                       , Guesses: {g.guessesUsed}/{MAX_GUESSES}, Time: {formatTime(g.timeInSeconds)}, Diff: Δ{g.percentDiff.toFixed(0)}%
                     </p>
                     {g.date && (
-                      <p className="text-xs sm:text-sm text-gray-500">{g.date}</p>
+                      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{g.date}</p>
                     )}
                   </div>
                 ))}

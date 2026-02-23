@@ -21,13 +21,13 @@ export default async function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6">
       <div className="max-w-md lg:max-w-xl xl:max-w-2xl w-full text-center space-y-4 sm:space-y-8">
         <div className="space-y-0.5 sm:space-y-1 text-center">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#1a1a1b]">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#1a1a1b] dark:text-gray-100">
             🃏 Hold&apos;emle 🃏
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#1a1a1b] font-medium">
+          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#1a1a1b] dark:text-gray-200 font-medium">
             Texas Hold&apos;em Daily Puzzle
           </p>
-          <p className="text-sm sm:text-lg lg:text-xl xl:text-2xl text-gray-600">
+          <p className="text-sm sm:text-lg lg:text-xl xl:text-2xl text-gray-600 dark:text-gray-400">
             Hello, {nickname || "anonymous"}
           </p>
         </div>
@@ -43,13 +43,13 @@ export default async function Home() {
               </Link>
               <Link
                 href="/stats"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] dark:bg-[#5a9fd9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] dark:hover:bg-[#6aafe9] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
                 Stats
               </Link>
               <Link
                 href="/leaderboard"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] hover:bg-[#C9A227] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
                 View Leaderboard
               </Link>
@@ -64,13 +64,13 @@ export default async function Home() {
               </Link>
               <Link
                 href="/game?demo=1"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] dark:bg-[#5a9fd9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] dark:hover:bg-[#6aafe9] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
                 Try Demo
               </Link>
               <Link
                 href="/leaderboard"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] hover:bg-[#C9A227] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
                 View Leaderboard
               </Link>
@@ -79,13 +79,13 @@ export default async function Home() {
           <SuggestionBox isLoggedIn={!!user} />
           <Link
             href="/how-to-play"
-            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#f6f7f8] text-[#1a1a1b] font-semibold rounded-lg border border-[#d3d6da] hover:bg-[#e8e9eb] transition-colors [touch-action:manipulation] flex items-center justify-center"
+            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#f6f7f8] dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100 font-semibold rounded-lg border border-[#d3d6da] dark:border-gray-600 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 transition-colors [touch-action:manipulation] flex items-center justify-center"
           >
             How to Play
           </Link>
         </div>
 
-        <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] w-full flex flex-col gap-10">
+        <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-10">
           <div className="w-full h-[220px] sm:h-[260px] flex justify-center items-center">
             <DailyPlaysChart />
           </div>
@@ -94,7 +94,7 @@ export default async function Home() {
               href={process.env.NEXT_PUBLIC_GITHUB_REPO || "https://github.com/guygir/Holdemle"}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#1a1a1b] transition-colors"
+              className="flex flex-col items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-[#1a1a1b] dark:hover:text-gray-100 transition-colors"
             >
               <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
@@ -102,10 +102,10 @@ export default async function Home() {
               <span className="text-sm sm:text-base">Open to contributions</span>
             </a>
             <div className="mt-4">
-              <p className="text-sm sm:text-base lg:text-xl text-gray-500 flex items-center justify-center gap-1">
+              <p className="text-sm sm:text-base lg:text-xl text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
                 <span>📊</span> Latest Updates
               </p>
-              <ul className="text-sm sm:text-base lg:text-xl text-gray-600 mt-0.5 sm:mt-1 list-none p-0">
+              <ul className="text-sm sm:text-base lg:text-xl text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1 list-none p-0">
                 {(versionData.updates as Array<{ version: string; note: string }>).map((u) => (
                   <li key={u.version}>v{u.version} - {u.note}</li>
                 ))}

@@ -49,7 +49,7 @@ export function ResultsDisplay({
 
   return (
     <div className="space-y-2 sm:space-y-4 w-full max-w-full min-w-0">
-      <h2 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold text-center">
+      <h2 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold text-center text-[#1a1a1b] dark:text-gray-100">
         {isSolved
           ? `Solved in ${guessesUsed} guess${guessesUsed > 1 ? "es" : ""}! 🎉`
           : "Better luck next time!"}
@@ -60,25 +60,25 @@ export function ResultsDisplay({
         <span className={isSolved ? "text-[#6aaa64]" : "text-[#dc2626]"}>
           {isSolved ? "WON" : "LOSS"}
         </span>
-        <span className="text-gray-600 font-semibold">
+        <span className="text-gray-600 dark:text-gray-400 font-semibold">
           Guesses: {guessesUsed}/{MAX_GUESSES}
         </span>
-        <span className="text-gray-600 font-semibold">
+        <span className="text-gray-600 dark:text-gray-400 font-semibold">
           Time: {formatTime(timeInSeconds)}
         </span>
         {percentDiff > 0 && (
-          <span className="text-gray-600 font-semibold">
+          <span className="text-gray-600 dark:text-gray-400 font-semibold">
             Difference: Δ{percentDiff.toFixed(0)}%
           </span>
         )}
       </div>
       {rank && (
-        <p className="text-base sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 font-semibold">Rank: #{rank} today</p>
+        <p className="text-base sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 dark:text-gray-400 font-semibold">Rank: #{rank} today</p>
       )}
 
       {/* Correct row - on TOP */}
-      <div className="flex flex-col gap-1 pt-1 border-t border-[#d3d6da]">
-        <p className="text-xs sm:text-sm font-medium text-gray-600">
+      <div className="flex flex-col gap-1 pt-1 border-t border-[#d3d6da] dark:border-gray-600">
+        <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
           Correct:
         </p>
         <div className="grid grid-cols-4 gap-1 sm:gap-2">
@@ -138,7 +138,7 @@ export function ResultsDisplay({
           );
           return (
             <div key={attempt.attempt} className="flex flex-col gap-1">
-              <p className="text-xs sm:text-sm font-medium text-gray-600">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                 Guess {attempt.attempt}:
               </p>
               <div className="grid grid-cols-4 gap-1 sm:gap-2">
