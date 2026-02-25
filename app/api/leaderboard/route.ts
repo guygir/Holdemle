@@ -236,7 +236,11 @@ export async function GET(request: NextRequest) {
   const { data: profiles } = userIds.length
     ? await adminSupabase.from("profiles").select("user_id, nickname, email").in("user_id", userIds)
     : { data: [] };
+  const { data: statsRows } = userIds.length
+    ? await adminSupabase.from("user_stats").select("user_id, current_streak").in("user_id", userIds)
+    : { data: [] };
   const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+  const streakMap = new Map((statsRows ?? []).map((s) => [s.user_id, s.current_streak ?? 0]));
 
   const entries = limited.map((g, i) => {
     const p = profileMap.get(g.user_id);
@@ -250,6 +254,7 @@ export async function GET(request: NextRequest) {
       timeInSeconds: g.time_taken_seconds,
       percentDiff: g.percent_diff ?? 0,
       submittedAt: g.submitted_at,
+      currentStreak: streakMap.get(g.user_id) ?? 0,
     };
   });
 

@@ -19,6 +19,7 @@ interface DailyEntry {
   timeInSeconds: number;
   percentDiff: number;
   submittedAt?: string;
+  currentStreak?: number;
 }
 
 type AllTimeTab = "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff";
@@ -171,6 +172,14 @@ export default function LeaderboardPage() {
                     <span>
                       Time: {formatTime((e as DailyEntry).timeInSeconds)}
                     </span>
+                    {(() => {
+                      const streak = (e as DailyEntry).currentStreak;
+                      return streak != null && streak >= 3 ? (
+                        <span className="text-[#f5793a] font-medium">
+                          🔥 {streak} days straight!
+                        </span>
+                      ) : null;
+                    })()}
                     {(e as DailyEntry).percentDiff > 0 && (
                       <span>Difference: Δ{(e as DailyEntry).percentDiff.toFixed(0)}%</span>
                     )}

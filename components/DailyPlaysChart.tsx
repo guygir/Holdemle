@@ -79,7 +79,12 @@ export default function DailyPlaysChart() {
   const scaleY = (plays: number) =>
     MARGIN_TOP + PLOT_HEIGHT - (plays / maxPlays) * PLOT_HEIGHT;
 
-  const linePoints = data.points
+  const points = data.points;
+  const solidPoints = points.length > 1 ? points.slice(0, -1) : [];
+  const todayPoint = points.length > 0 ? points[points.length - 1] : null;
+  const yesterdayPoint = points.length >= 2 ? points[points.length - 2] : null;
+
+  const solidLinePoints = solidPoints
     .map((p) => `${scaleX(p.day)},${scaleY(p.plays)}`)
     .join(" ");
 
@@ -176,15 +181,44 @@ export default function DailyPlaysChart() {
           Players
         </text>
 
-        {/* Line chart */}
-        <polyline
-          points={linePoints}
-          fill="none"
-          stroke="#6aaa64"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        {/* Solid line up to yesterday */}
+        {solidLinePoints && (
+          <polyline
+            points={solidLinePoints}
+            fill="none"
+            stroke="#6aaa64"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+
+        {/* Dotted line from yesterday to today */}
+        {yesterdayPoint && todayPoint && (
+          <line
+            x1={scaleX(yesterdayPoint.day)}
+            y1={scaleY(yesterdayPoint.plays)}
+            x2={scaleX(todayPoint.day)}
+            y2={scaleY(todayPoint.plays)}
+            stroke="#6aaa64"
+            strokeWidth="2"
+            strokeDasharray="4 3"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* Today as dotted circle */}
+        {todayPoint && (
+          <circle
+            cx={scaleX(todayPoint.day)}
+            cy={scaleY(todayPoint.plays)}
+            r="4"
+            fill="none"
+            stroke="#6aaa64"
+            strokeWidth="2"
+            strokeDasharray="3 2"
+          />
+        )}
 
       </svg>
     </div>
