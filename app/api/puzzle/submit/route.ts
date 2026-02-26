@@ -53,6 +53,13 @@ export async function POST(request: NextRequest) {
 
   const { puzzleId, guesses, attemptNumber, timeInSeconds } = body;
 
+  console.log("[submit] event=submit request:", {
+    puzzleId,
+    attemptNumber,
+    timeInSeconds,
+    guesses: guesses?.map((g) => ({ pos: g.position, pct: g.percent })),
+  });
+
   const useDemo = getUseDemo();
   if (useDemo === "fail") {
     return NextResponse.json(
@@ -156,6 +163,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const MAX_TIME_SECONDS = 24 * 60 * 60;
+
   const { data: puzzle, error: puzzleError } = await supabase
     .from("puzzles")
     .select("*, hands")
@@ -202,16 +211,59 @@ export async function POST(request: NextRequest) {
     .single();
 
   const previousHistory = (existingGuess?.guess_history as Array<unknown>) ?? [];
+  const guessesUsed = previousHistory.length + 1;
+
+  console.log("[submit] derived:", { guessesUsed, attemptNumber, match: attemptNumber === guessesUsed });
+
+  if (attemptNumber !== guessesUsed) {
+    return NextResponse.json(
+      { success: false, error: "Attempt number mismatch" },
+      { status: 400 }
+    );
+  }
+
+  const { data: session } = await supabase
+    .from("puzzle_play_sessions")
+    .select("started_at, paused_at, total_pause_seconds")
+    .eq("user_id", user.id)
+    .eq("puzzle_id", puzzleId)
+    .single();
+
+  let timeInSecondsFinal: number;
+  if (session) {
+    const startedAt = new Date(session.started_at).getTime();
+    let totalPause = session.total_pause_seconds ?? 0;
+    if (session.paused_at) {
+      totalPause += Math.floor(
+        (Date.now() - new Date(session.paused_at).getTime()) / 1000
+      );
+    }
+    timeInSecondsFinal = Math.max(
+      0,
+      Math.floor((Date.now() - startedAt) / 1000) - totalPause
+    );
+    timeInSecondsFinal = Math.min(timeInSecondsFinal, MAX_TIME_SECONDS);
+    console.log("[submit] server-computed time:", {
+      timeInSecondsFinal,
+      clientReported: timeInSeconds,
+    });
+  } else {
+    timeInSecondsFinal = Math.max(
+      0,
+      Math.min(Math.floor(timeInSeconds), MAX_TIME_SECONDS)
+    );
+    console.log("[submit] no play session (fallback), timeInSeconds:", timeInSecondsFinal);
+  }
+
   const newAttempt = {
-    attempt: attemptNumber,
+    attempt: guessesUsed,
     guesses: feedback,
   };
   const guessHistory = [...previousHistory, newAttempt];
-  const guessesUsed = attemptNumber;
   const totalScore = isSolved
-    ? calculateScore(guessesUsed, timeInSeconds)
+    ? calculateScore(guessesUsed, timeInSecondsFinal)
     : guessesUsed >= MAX_GUESSES
-      ? calculateScore(MAX_GUESSES, timeInSeconds)
+      ? calculateScore(MAX_GUESSES, timeInSecondsFinal)
       : 0;
 
   const percentDiff = computePercentDiff(
@@ -239,7 +291,7 @@ export async function POST(request: NextRequest) {
         guess_history: guessHistory,
         guesses_used: guessesUsed,
         is_solved: isSolved,
-        time_taken_seconds: timeInSeconds,
+        time_taken_seconds: timeInSecondsFinal,
         total_score: totalScore,
         percent_diff: percentDiff,
       })
@@ -253,14 +305,14 @@ export async function POST(request: NextRequest) {
       );
     }
   } else {
-    const gameStartedAt = new Date(Date.now() - timeInSeconds * 1000).toISOString();
+    const gameStartedAt = new Date(Date.now() - timeInSecondsFinal * 1000).toISOString();
     const { error: insertError } = await supabase.from("guesses").insert({
       user_id: user.id,
       puzzle_id: puzzleId,
       guess_history: guessHistory,
       guesses_used: guessesUsed,
       is_solved: isSolved,
-      time_taken_seconds: timeInSeconds,
+      time_taken_seconds: timeInSecondsFinal,
       total_score: totalScore,
       percent_diff: percentDiff,
       game_started_at: gameStartedAt,
@@ -283,6 +335,14 @@ export async function POST(request: NextRequest) {
       puzzleDate: puzzle.puzzle_date,
       percentDiff,
     });
+  }
+
+  if (isSolved || guessesUsed >= MAX_GUESSES) {
+    await supabase
+      .from("puzzle_play_sessions")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("puzzle_id", puzzleId);
   }
 
   const guessesRemaining = Math.max(0, MAX_GUESSES - guessesUsed);

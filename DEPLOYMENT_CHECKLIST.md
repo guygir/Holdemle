@@ -33,6 +33,9 @@ Run in order:
 8. `supabase/migrations/008_unique_nickname.sql` (unique nicknames for leaderboard)
 9. `supabase/migrations/009_handle_nickname_unique_trigger.sql` (auto-unique nickname on signup)
 10. `supabase/migrations/010_auth_email_and_login_function.sql` (nickname+password login lookup)
+11. `supabase/migrations/011_nickname_unique_error_no_suffix.sql`
+12. `supabase/migrations/012_puzzles_rls_allow_past.sql`
+13. `supabase/migrations/015_play_sessions.sql` (event-based start/pause/resume; server-computed time; replaces 013/014)
 
 ### 1.4 Disable email confirmation
 **Where:** Supabase Dashboard → **Authentication** → **Providers** → **Email**

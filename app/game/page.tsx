@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PokerHand } from "@/components/PokerHand";
@@ -60,6 +60,9 @@ function GameContent() {
   const [startTime, setStartTime] = useState(Date.now());
   const [showTutorial, setShowTutorial] = useState(false);
   const [showFeedbackTutorial, setShowFeedbackTutorial] = useState(false);
+  const [pausedElapsedSeconds, setPausedElapsedSeconds] = useState<number | null>(null);
+  const lastPausedElapsedRef = useRef<number | null>(null);
+  const pauseStateRef = useRef<{ puzzleId: string; startTime: number } | null>(null);
 
   const fetchPuzzle = useCallback(async () => {
     setLoading(true);
@@ -107,6 +110,12 @@ function GameContent() {
 
   // Pause timer when leaving the page (only for real game, in-progress)
   const isGameOver = puzzle?.userGuess?.isSolved || (puzzle?.userGuess?.guessesUsed ?? 0) >= MAX_GUESSES;
+  pauseStateRef.current =
+    !isDemoMode && puzzle?.puzzleId && puzzle.puzzleId !== "demo-puzzle" && !isGameOver
+      ? { puzzleId: puzzle.puzzleId, startTime }
+      : null;
+
+  // Play session: start on load, pause on hide (sendBeacon for tab close), resume on show
   useEffect(() => {
     if (isDemoMode || !puzzle?.puzzleId || puzzle.puzzleId === "demo-puzzle") return;
     if (isGameOver) return;
@@ -114,30 +123,77 @@ function GameContent() {
     const puzzleId = puzzle.puzzleId;
     const startRef = { current: startTime };
 
-    const savePauseState = () => {
+    const sendPause = () => {
       const elapsed = Math.floor((Date.now() - startRef.current) / 1000);
-      fetch("/api/puzzle/pause", {
+      lastPausedElapsedRef.current = elapsed;
+      setPausedElapsedSeconds(elapsed);
+      const body = JSON.stringify({ puzzleId, event: "pause" });
+      const blob = new Blob([body], { type: "application/json" });
+      navigator.sendBeacon("/api/puzzle/play-session", blob);
+    };
+
+    const sendPauseFetch = () => {
+      const elapsed = Math.floor((Date.now() - startRef.current) / 1000);
+      lastPausedElapsedRef.current = elapsed;
+      setPausedElapsedSeconds(elapsed);
+      fetch("/api/puzzle/play-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ puzzleId, elapsedSeconds: elapsed }),
+        body: JSON.stringify({ puzzleId, event: "pause" }),
         credentials: "include",
-        keepalive: true,
       }).catch(() => {});
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) savePauseState();
+      if (document.hidden) {
+        sendPauseFetch();
+      } else {
+        const elapsed = lastPausedElapsedRef.current;
+        if (elapsed != null) {
+          setStartTime(Date.now() - elapsed * 1000);
+          lastPausedElapsedRef.current = null;
+          setPausedElapsedSeconds(null);
+        }
+        fetch("/api/puzzle/play-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ puzzleId, event: "resume" }),
+          credentials: "include",
+        }).catch(() => {});
+        fetchPuzzle();
+      }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pagehide", savePauseState);
+    window.addEventListener("pagehide", sendPause);
 
     return () => {
-      savePauseState();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pagehide", savePauseState);
+      window.removeEventListener("pagehide", sendPause);
     };
   }, [isDemoMode, puzzle?.puzzleId, isGameOver, startTime]);
+
+  useEffect(() => {
+    return () => {
+      const state = pauseStateRef.current;
+      if (state && !document.hidden) {
+        const body = JSON.stringify({ puzzleId: state.puzzleId, event: "pause" });
+        const blob = new Blob([body], { type: "application/json" });
+        navigator.sendBeacon("/api/puzzle/play-session", blob);
+      }
+    };
+  }, []);
+
+  // Send "start" when game loads (in-progress, real puzzle)
+  useEffect(() => {
+    if (isDemoMode || !puzzle?.puzzleId || puzzle.puzzleId === "demo-puzzle" || isGameOver) return;
+    fetch("/api/puzzle/play-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ puzzleId: puzzle.puzzleId, event: "start" }),
+      credentials: "include",
+    }).catch(() => {});
+  }, [isDemoMode, puzzle?.puzzleId, isGameOver]);
 
   useEffect(() => {
     if (isDemoMode && puzzle && typeof window !== "undefined") {
@@ -393,7 +449,7 @@ function GameContent() {
         <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
           <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
-            <Timer startTime={startTime} className="font-mono text-xs sm:text-base lg:text-xl" />
+            <Timer startTime={startTime} pausedSeconds={pausedElapsedSeconds} className="font-mono text-xs sm:text-base lg:text-xl" />
           </div>
 
           <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center">

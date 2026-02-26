@@ -120,6 +120,33 @@ export async function GET(request: Request) {
   const hasSubmitted = userGuess && userGuess.guesses_used > 0;
   const gameOver = userGuess && (userGuess.is_solved || userGuess.guesses_used >= MAX_GUESSES);
 
+  let sessionElapsedSeconds: number | null = null;
+  if (user && userGuess && !gameOver) {
+    const { data: session } = await supabase
+      .from("puzzle_play_sessions")
+      .select("started_at, paused_at, total_pause_seconds")
+      .eq("user_id", user.id)
+      .eq("puzzle_id", puzzle.id)
+      .single();
+
+    if (session) {
+      const startedAt = new Date(session.started_at).getTime();
+      const totalPause = session.total_pause_seconds ?? 0;
+      if (session.paused_at) {
+        const pausedAt = new Date(session.paused_at).getTime();
+        sessionElapsedSeconds = Math.max(
+          0,
+          Math.floor((pausedAt - startedAt) / 1000) - totalPause
+        );
+      } else {
+        sessionElapsedSeconds = Math.max(
+          0,
+          Math.floor((Date.now() - startedAt) / 1000) - totalPause
+        );
+      }
+    }
+  }
+
   return NextResponse.json({
     success: true,
     data: {
@@ -142,7 +169,7 @@ export async function GET(request: Request) {
             percentDiff: userGuess.percent_diff ?? 0,
             submittedAt: userGuess.submitted_at,
             gameStartedAt: userGuess.game_started_at ?? null,
-            pausedElapsedSeconds: userGuess.paused_elapsed_seconds ?? null,
+            pausedElapsedSeconds: sessionElapsedSeconds ?? userGuess.paused_elapsed_seconds ?? null,
             actualPercentages: gameOver
               ? puzzle.hands.map(
                   (h: { position: number; actualPercent: number }) => ({

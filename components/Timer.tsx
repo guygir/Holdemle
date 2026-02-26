@@ -5,21 +5,27 @@ import { useState, useEffect } from "react";
 interface TimerProps {
   startTime: number;
   className?: string;
+  pausedSeconds?: number | null;
 }
 
-export function Timer({ startTime, className }: TimerProps) {
+export function Timer({ startTime, className, pausedSeconds }: TimerProps) {
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
+    if (pausedSeconds != null) {
+      setSeconds(pausedSeconds);
+      return;
+    }
     const tick = () =>
       setSeconds(Math.floor((Date.now() - startTime) / 1000));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [startTime]);
+  }, [startTime, pausedSeconds]);
 
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
+  const displaySeconds = pausedSeconds != null ? pausedSeconds : seconds;
+  const mins = Math.floor(displaySeconds / 60);
+  const secs = displaySeconds % 60;
 
   return (
     <span className={className}>
