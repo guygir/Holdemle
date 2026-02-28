@@ -6,8 +6,9 @@ A daily poker puzzle game inspired by Wordle. Guess the pre-flop winning percent
 
 <!-- VERSION_SECTION - Do not edit manually; run `npm run version:sync` to update from lib/version.json -->
 - v1.0 - We're live!
-- v1.1 - Suggest a feature button added.
-- v1.2 - Dark mode support.
+- v1.1 - Added "Suggest a Feature" button
+- v1.2 - Added Dark Mode
+- v1.3 - Improved UI/UX: Adaptive Guess Bounds
 <!-- VERSION_SECTION_END -->
 
 ## Quick Start

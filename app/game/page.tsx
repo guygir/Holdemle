@@ -232,6 +232,27 @@ function GameContent() {
     ? puzzle.userGuess.guessesUsed + 1
     : 1;
 
+  // Per-hand min/max from feedback: low -> min=x, high -> max=x, exact -> min=max=x
+  const handBounds = useMemo(() => {
+    const bounds: Record<number, { min: number; max: number }> = {};
+    for (const h of puzzle?.hands ?? []) {
+      bounds[h.position] = { min: 0, max: 100 };
+    }
+    for (const attempt of puzzle?.userGuess?.guessHistory ?? []) {
+      for (const g of attempt.guesses) {
+        const b = bounds[g.position] ?? { min: 0, max: 100 };
+        if (g.feedback === "low") b.min = Math.max(b.min, g.percent);
+        else if (g.feedback === "high") b.max = Math.min(b.max, g.percent);
+        else if (g.feedback === "exact") {
+          b.min = g.percent;
+          b.max = g.percent;
+        }
+        bounds[g.position] = b;
+      }
+    }
+    return bounds;
+  }, [puzzle?.hands, puzzle?.userGuess?.guessHistory]);
+
   async function handleSubmit() {
     if (!puzzle || total !== 100 || submitting) return;
 
@@ -456,7 +477,12 @@ function GameContent() {
             <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 text-center mb-1">
               Guess each hand&apos;s preflop equity (%)
             </p>
-            {puzzle.hands.map((hand) => (
+            {puzzle.hands.map((hand) => {
+              const { min: handMin, max: handMax } = handBounds[hand.position] ?? { min: 0, max: 100 };
+              const v = guesses[hand.position] ?? handMin;
+              const canDecrease = v > handMin;
+              const canIncrease = v < handMax;
+              return (
               <div key={hand.position} className="flex items-center gap-1.5 sm:gap-3 justify-center">
                 <div className="flex-initial max-w-[280px] sm:max-w-[360px]">
                   <PokerHand
@@ -468,22 +494,23 @@ function GameContent() {
                 <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                   <button
                     type="button"
+                    disabled={!canDecrease}
                     onClick={() => {
-                      const v = guesses[hand.position] ?? 0;
+                      if (!canDecrease) return;
                       setGuesses((g) => ({
                         ...g,
-                        [hand.position]: Math.max(0, v - 1),
+                        [hand.position]: Math.max(handMin, (g[hand.position] ?? handMin) - 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-l bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-l bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f6f7f8] disabled:dark:hover:bg-gray-700 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
                     aria-label="Decrease by 1"
                   >
                     ↓
                   </button>
                   <input
                     type="number"
-                    min={0}
-                    max={100}
+                    min={handMin}
+                    max={handMax}
                     value={guesses[hand.position] ?? ""}
                     onChange={(e) => {
                       const raw = e.target.value;
@@ -495,12 +522,16 @@ function GameContent() {
                         });
                         return;
                       }
-                      const v = parseInt(raw, 10);
-                      if (!isNaN(v)) {
-                        setGuesses((g) => ({
-                          ...g,
-                          [hand.position]: Math.min(100, Math.max(0, v)),
-                        }));
+                      const val = parseInt(raw, 10);
+                      if (!isNaN(val)) {
+                        setGuesses((g) => ({ ...g, [hand.position]: val }));
+                      }
+                    }}
+                    onBlur={() => {
+                      const val = guesses[hand.position];
+                      if (val === undefined || val < handMin || val > handMax) {
+                        const clamped = val === undefined || val < handMin ? handMin : handMax;
+                        setGuesses((g) => ({ ...g, [hand.position]: clamped }));
                       }
                     }}
                     onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
@@ -508,14 +539,15 @@ function GameContent() {
                   />
                   <button
                     type="button"
+                    disabled={!canIncrease}
                     onClick={() => {
-                      const v = guesses[hand.position] ?? 0;
+                      if (!canIncrease) return;
                       setGuesses((g) => ({
                         ...g,
-                        [hand.position]: Math.min(100, v + 1),
+                        [hand.position]: Math.min(handMax, (g[hand.position] ?? handMin) + 1),
                       }));
                     }}
-                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-r bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
+                    className="p-0.5 sm:p-1 w-14 sm:w-20 lg:w-24 min-h-[36px] sm:min-h-[44px] lg:min-h-[52px] flex items-center justify-center border border-[#d3d6da] dark:border-gray-600 rounded-r bg-[#f6f7f8] dark:bg-gray-700 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#f6f7f8] disabled:dark:hover:bg-gray-700 text-lg sm:text-xl [touch-action:manipulation] text-[#1a1a1b] dark:text-gray-100"
                     aria-label="Increase by 1"
                   >
                     ↑
@@ -523,7 +555,7 @@ function GameContent() {
                   <span className="text-sm sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">%</span>
                 </div>
               </div>
-            ))}
+            );})}
           </div>
 
           <p
