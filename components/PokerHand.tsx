@@ -1,4 +1,8 @@
-import { cardToDisplay, isRedSuit } from "@/lib/poker/deck";
+"use client";
+
+import { cardToDisplay } from "@/lib/poker/deck";
+import { getCardColor } from "@/lib/deck-colors";
+import { useDeckColors } from "@/components/DeckColorProvider";
 
 interface PokerHandProps {
   cards: [string, string];
@@ -31,6 +35,7 @@ export function PokerHand({
   showFeedbackEmoji = false,
   size = "normal",
 }: PokerHandProps) {
+  const { scheme } = useDeckColors();
   const isLarge = size === "large";
   const stackedLayout = showPercent && (showFeedbackEmoji || feedback);
 
@@ -48,9 +53,8 @@ export function PokerHand({
         {cards.map((card) => (
           <div
             key={card}
-            className={`w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-xs sm:text-sm lg:text-base font-bold bg-white border border-[#d3d6da] ${
-              isRedSuit(card) ? "text-red-600" : "text-black"
-            }`}
+            className="w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-xs sm:text-sm lg:text-base font-bold bg-white dark:bg-white border border-[#d3d6da] dark:border-[#d3d6da]"
+            style={{ color: getCardColor(card, scheme) }}
           >
             {cardToDisplay(card)}
           </div>

@@ -4,6 +4,5 @@
     { "version": "1.0", "note": "We're live!" },
     { "version": "1.1", "note": "Added \"Suggest a Feature\" button" },
     { "version": "1.2", "note": "Added Dark Mode" },
-    { "version": "1.3", "note": "Improved UI/UX: Adaptive Guess Bounds" }
-  ]
+    { "version": "1.3", "note": "Improved UI/UX: Guess Bounds, 4-Color Decks" }  ]
 }
