@@ -2,12 +2,20 @@ import { describe, it, expect } from "vitest";
 import { roundToSum100 } from "./odds-calculator";
 
 describe("roundToSum100", () => {
-  it("throws for non-4 values", () => {
-    expect(() => roundToSum100([1, 2, 3])).toThrow("exactly 4");
+  it("returns values summing to 100 for 4 hands", () => {
+    const odds = [24.7, 31.2, 18.9, 25.2];
+    const result = roundToSum100(odds);
+    expect(result.reduce((a, b) => a + b, 0)).toBe(100);
   });
 
-  it("returns values summing to 100", () => {
-    const odds = [24.7, 31.2, 18.9, 25.2];
+  it("returns values summing to 100 for 3 hands", () => {
+    const odds = [33.3, 33.3, 33.4];
+    const result = roundToSum100(odds);
+    expect(result.reduce((a, b) => a + b, 0)).toBe(100);
+  });
+
+  it("returns values summing to 100 for 5 hands", () => {
+    const odds = [20.1, 20.2, 20.3, 19.8, 19.6];
     const result = roundToSum100(odds);
     expect(result.reduce((a, b) => a + b, 0)).toBe(100);
   });
