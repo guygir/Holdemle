@@ -4,7 +4,7 @@ import { getUseDemo } from "@/lib/demo-mode";
 import { MAX_GUESSES } from "@/lib/game-config";
 import { getCurrentPuzzleDate } from "@/lib/puzzle";
 
-// Demo puzzle - Percentages from pokersolver Monte Carlo 1M (npx tsx scripts/calc-demo-odds-new.ts)
+// Demo puzzles - Percentages calculated with exhaustive enumeration
 const DEMO_PUZZLE = {
   id: "demo-puzzle",
   puzzle_date: new Date().toISOString().split("T")[0],
@@ -17,9 +17,34 @@ const DEMO_PUZZLE = {
   difficulty: "medium",
 };
 
+const DEMO3_PUZZLE = {
+  id: "demo3-puzzle",
+  puzzle_date: new Date().toISOString().split("T")[0],
+  hands: [
+    { position: 1, cards: ["As", "Ah"], actualPercent: 70 },
+    { position: 2, cards: ["Kd", "Kc"], actualPercent: 18 },
+    { position: 3, cards: ["Qh", "Js"], actualPercent: 12 },
+  ],
+  difficulty: "easy",
+};
+
+const DEMO5_PUZZLE = {
+  id: "demo5-puzzle",
+  puzzle_date: new Date().toISOString().split("T")[0],
+  hands: [
+    { position: 1, cards: ["As", "Kh"], actualPercent: 25 },
+    { position: 2, cards: ["Qd", "Qc"], actualPercent: 31 },
+    { position: 3, cards: ["Jh", "Js"], actualPercent: 16 },
+    { position: 4, cards: ["Tc", "9c"], actualPercent: 14 },
+    { position: 5, cards: ["7d", "7h"], actualPercent: 14 },
+  ],
+  difficulty: "hard",
+};
+
 export async function GET(request: Request) {
-  const isDemoRequest = new URL(request.url).searchParams.get("demo") === "1";
+  const demoParam = new URL(request.url).searchParams.get("demo");
   const useDemo = getUseDemo();
+  
   if (useDemo === "fail") {
     return NextResponse.json(
       {
@@ -29,17 +54,26 @@ export async function GET(request: Request) {
       { status: 503 }
     );
   }
-  if (useDemo || isDemoRequest) {
+  
+  // Select demo puzzle based on parameter
+  let demoPuzzle = DEMO_PUZZLE;
+  if (demoParam === "3") {
+    demoPuzzle = DEMO3_PUZZLE;
+  } else if (demoParam === "5") {
+    demoPuzzle = DEMO5_PUZZLE;
+  }
+  
+  if (useDemo || demoParam) {
     return NextResponse.json({
       success: true,
       data: {
-        puzzleId: DEMO_PUZZLE.id,
-        date: DEMO_PUZZLE.puzzle_date,
-        hands: DEMO_PUZZLE.hands.map((h) => ({
+        puzzleId: demoPuzzle.id,
+        date: demoPuzzle.puzzle_date,
+        hands: demoPuzzle.hands.map((h) => ({
           position: h.position,
           cards: h.cards,
         })),
-        difficulty: DEMO_PUZZLE.difficulty,
+        difficulty: demoPuzzle.difficulty,
         userHasGuessed: false,
         userGuess: undefined,
       },

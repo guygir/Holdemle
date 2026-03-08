@@ -70,9 +70,34 @@ export async function POST(request: NextRequest) {
       { status: 503 }
     );
   }
-  // Demo puzzle can be submitted without auth (Try Demo flow)
-  if (puzzleId === "demo-puzzle") {
-    const validation = validateGuesses(guesses);
+  // Demo puzzles can be submitted without auth (Try Demo flow)
+  if (puzzleId === "demo-puzzle" || puzzleId === "demo3-puzzle" || puzzleId === "demo5-puzzle") {
+    // Determine expected hand count based on puzzle ID
+    let demoHands: Array<{ position: number; actualPercent: number }>;
+    if (puzzleId === "demo3-puzzle") {
+      demoHands = [
+        { position: 1, actualPercent: 70 },
+        { position: 2, actualPercent: 18 },
+        { position: 3, actualPercent: 12 },
+      ];
+    } else if (puzzleId === "demo5-puzzle") {
+      demoHands = [
+        { position: 1, actualPercent: 25 },
+        { position: 2, actualPercent: 31 },
+        { position: 3, actualPercent: 16 },
+        { position: 4, actualPercent: 14 },
+        { position: 5, actualPercent: 14 },
+      ];
+    } else {
+      demoHands = [
+        { position: 1, actualPercent: 30 },
+        { position: 2, actualPercent: 38 },
+        { position: 3, actualPercent: 17 },
+        { position: 4, actualPercent: 15 },
+      ];
+    }
+    
+    const validation = validateGuesses(guesses, demoHands.length);
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, error: validation.error },
@@ -88,12 +113,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const demoHands = [
-      { position: 1, actualPercent: 30 },
-      { position: 2, actualPercent: 38 },
-      { position: 3, actualPercent: 17 },
-      { position: 4, actualPercent: 15 },
-    ];
     const actualPercents = Object.fromEntries(
       demoHands.map((h) => [h.position, h.actualPercent])
     );

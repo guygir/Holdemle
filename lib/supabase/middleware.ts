@@ -32,9 +32,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // When using Supabase, require auth to play (unless Try Demo: ?demo=1)
+  // When using Supabase, require auth to play (unless Try Demo: ?demo=1/3/5)
   if (request.nextUrl.pathname === "/game" && !user) {
-    const isDemoTry = request.nextUrl.searchParams.get("demo") === "1";
+    const demoParam = request.nextUrl.searchParams.get("demo");
+    const isDemoTry = demoParam === "1" || demoParam === "3" || demoParam === "5";
     if (!isDemoTry) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("redirect", "/game");

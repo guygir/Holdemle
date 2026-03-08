@@ -12,6 +12,7 @@ interface PokerHandProps {
   showPercent?: boolean;
   showFeedbackEmoji?: boolean;
   size?: "normal" | "large";
+  handCount?: number;
 }
 
 const feedbackColors = {
@@ -34,6 +35,7 @@ export function PokerHand({
   showPercent = true,
   showFeedbackEmoji = false,
   size = "normal",
+  handCount = 4,
 }: PokerHandProps) {
   const { scheme } = useDeckColors();
   const isLarge = size === "large";
@@ -41,19 +43,21 @@ export function PokerHand({
 
   return (
     <div
-      className={`flex gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 rounded-lg border ${
+      className={`flex rounded-lg border ${
         stackedLayout ? "flex-col items-center" : "items-center"
-      } ${
+      } gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 flex-1 min-w-0 ${
         isLarge ? "min-w-[200px] sm:min-w-[260px] lg:min-w-[320px]" : ""
       } ${isLarge && !showPercent ? "justify-center" : ""} ${
         feedback ? feedbackColors[feedback] : "bg-[#f6f7f8] border-[#d3d6da]"
       }`}
     >
-      <div className={`flex gap-0.5 sm:gap-1 lg:gap-2 ${isLarge ? "gap-1 sm:gap-2 lg:gap-3" : ""}`}>
+      <div className={`flex ${
+        isLarge ? "gap-1 sm:gap-2 lg:gap-3" : "gap-0.5 sm:gap-1 lg:gap-2"
+      }`}>
         {cards.map((card) => (
           <div
             key={card}
-            className="w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-xs sm:text-sm lg:text-base font-bold bg-white dark:bg-white border border-[#d3d6da] dark:border-[#d3d6da]"
+            className="rounded flex flex-col items-center justify-center font-bold bg-white dark:bg-white border border-[#d3d6da] dark:border-[#d3d6da] w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 text-xs sm:text-sm lg:text-base"
             style={{ color: getCardColor(card, scheme) }}
           >
             {cardToDisplay(card)}
@@ -61,7 +65,7 @@ export function PokerHand({
         ))}
       </div>
       {showPercent && (
-        <div className={`font-semibold flex-shrink-0 min-w-[4ch] ${stackedLayout ? "flex flex-row items-center justify-center gap-1" : "ml-auto flex flex-col items-center"}`}>
+        <div className={`font-semibold flex-shrink-0 min-w-[4ch] ${stackedLayout ? "flex flex-row items-center justify-center gap-0.5" : "ml-auto flex flex-col items-center"}`}>
           {guessedPercent !== undefined && (
             <span>{guessedPercent}%</span>
           )}

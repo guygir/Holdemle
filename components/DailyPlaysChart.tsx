@@ -134,7 +134,7 @@ export default function DailyPlaysChart() {
               y={scaleY(v) + 4}
               textAnchor="end"
               fill="#6b7280"
-              fontSize="10"
+              fontSize="12"
             >
               {v}
             </text>
@@ -151,7 +151,7 @@ export default function DailyPlaysChart() {
               y={MARGIN_TOP + PLOT_HEIGHT + 16}
               textAnchor="middle"
               fill="#6b7280"
-              fontSize="10"
+              fontSize="12"
             >
               {isLast ? "Today" : d}
             </text>
@@ -164,7 +164,7 @@ export default function DailyPlaysChart() {
           y={totalH - 6}
           textAnchor="middle"
           fill="#6b7280"
-          fontSize="11"
+          fontSize="13"
         >
           Days since launch
         </text>
@@ -175,7 +175,7 @@ export default function DailyPlaysChart() {
           y={MARGIN_TOP + PLOT_HEIGHT / 2}
           textAnchor="middle"
           fill="#6b7280"
-          fontSize="11"
+          fontSize="13"
           transform={`rotate(-90, 14, ${MARGIN_TOP + PLOT_HEIGHT / 2})`}
         >
           Players

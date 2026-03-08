@@ -252,3 +252,35 @@ export function generateFourHandsWithFamilies(
 
   return null;
 }
+
+/**
+ * Generate N hands with no overlapping cards.
+ * Generalized version of generateFourHandsWithFamilies.
+ */
+export function generateNHandsWithFamilies(
+  n: number,
+  weights: Record<HandFamily, number> = DEFAULT_HAND_FAMILY_WEIGHTS,
+  maxAttempts = 100
+): [string, string][] | null {
+  if (n < 1 || n > 10) return null; // Sanity check
+  
+  const used = new Set<string>();
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const hands: [string, string][] = [];
+    used.clear();
+
+    for (let i = 0; i < n; i++) {
+      const family = sampleFamily(weights);
+      const hand = pickHandFromFamily(family, used);
+      if (!hand) break;
+      hands.push(hand);
+      used.add(hand[0]);
+      used.add(hand[1]);
+    }
+
+    if (hands.length === n) return hands;
+  }
+
+  return null;
+}

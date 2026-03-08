@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
 import SuggestionBox from "@/components/SuggestionBox";
+import PollWidget from "@/components/PollWidget";
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -22,10 +23,10 @@ export default async function Home() {
       <div className="max-w-md lg:max-w-xl xl:max-w-2xl w-full text-center space-y-4 sm:space-y-8">
         <div className="space-y-0.5 sm:space-y-1 text-center">
           <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[#1a1a1b] dark:text-gray-100">
-            🃏 Hold&apos;emle 🃏
+            🃏 Hold'emle 🃏
           </h1>
           <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-[#1a1a1b] dark:text-gray-200 font-medium">
-            Texas Hold&apos;em Daily Puzzle
+            Texas Hold'em Daily Puzzle
           </p>
           <p className="text-sm sm:text-lg lg:text-xl xl:text-2xl text-gray-600 dark:text-gray-400">
             Hello, {nickname || "anonymous"}
@@ -39,8 +40,22 @@ export default async function Home() {
                 href="/game"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
-                Play Today&apos;s Puzzle
+                Play Today's Puzzle
               </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/game?demo=3"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#8dd484] dark:bg-[#7dc474] text-white font-semibold rounded-lg hover:bg-[#7dc474] dark:hover:bg-[#8dd484] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Try 3-hand Mode
+                </Link>
+                <Link
+                  href="/game?demo=5"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#3a7a34] dark:bg-[#2a6a24] text-white font-semibold rounded-lg hover:bg-[#2a6a24] dark:hover:bg-[#3a7a34] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Try 5-hand Mode
+                </Link>
+              </div>
               <Link
                 href="/stats"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] dark:bg-[#5a9fd9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] dark:hover:bg-[#6aafe9] transition-colors [touch-action:manipulation] flex items-center justify-center"
@@ -66,8 +81,22 @@ export default async function Home() {
                 href="/game?demo=1"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] dark:bg-[#5a9fd9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] dark:hover:bg-[#6aafe9] transition-colors [touch-action:manipulation] flex items-center justify-center"
               >
-                Try Demo
+                Try Demo (4 hands)
               </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/game?demo=3"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#8dd484] dark:bg-[#7dc474] text-white font-semibold rounded-lg hover:bg-[#7dc474] dark:hover:bg-[#8dd484] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Demo (3 hands)
+                </Link>
+                <Link
+                  href="/game?demo=5"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#3a7a34] dark:bg-[#2a6a24] text-white font-semibold rounded-lg hover:bg-[#2a6a24] dark:hover:bg-[#3a7a34] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Demo (5 hands)
+                </Link>
+              </div>
               <Link
                 href="/leaderboard"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
@@ -85,11 +114,34 @@ export default async function Home() {
           </Link>
         </div>
 
-        <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-10">
-          <div className="w-full h-[220px] sm:h-[260px] flex justify-center items-center">
-            <DailyPlaysChart />
+        <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-6 sm:gap-10">
+          {/* Daily Players Chart */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">
+              📈 Daily Players
+            </h2>
+            <div className="w-full h-[220px] sm:h-[260px] flex justify-center items-center">
+              <DailyPlaysChart />
+            </div>
           </div>
-          <div className="flex flex-col items-center justify-center gap-2 text-center">
+          
+          {/* Community Poll */}
+          <PollWidget pollId="a0000000-0000-0000-0000-000000000001" />
+          
+          {/* Latest Updates */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">
+              📣 Latest Updates
+            </h2>
+            <ul className="text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 list-none p-0 space-y-1.5 sm:space-y-2">
+              {(versionData.updates as Array<{ version: string; note: string }>).map((u) => (
+                <li key={u.version}>v{u.version} - {u.note}</li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* GitHub Link - Moved to bottom */}
+          <div className="flex flex-col items-center justify-center gap-2 text-center pt-4">
             <a
               href={process.env.NEXT_PUBLIC_GITHUB_REPO || "https://github.com/guygir/Holdemle"}
               target="_blank"
@@ -101,19 +153,11 @@ export default async function Home() {
               </svg>
               <span className="text-sm sm:text-base">Open to contributions</span>
             </a>
-            <div className="mt-4">
-              <p className="text-sm sm:text-base lg:text-xl text-gray-500 dark:text-gray-400 flex items-center justify-center gap-1">
-                <span>📊</span> Latest Updates
-              </p>
-              <ul className="text-sm sm:text-base lg:text-xl text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1 list-none p-0">
-                {(versionData.updates as Array<{ version: string; note: string }>).map((u) => (
-                  <li key={u.version}>v{u.version} - {u.note}</li>
-                ))}
-              </ul>
-            </div>
           </div>
         </div>
       </div>
     </main>
   );
 }
+
+// Made with Bob

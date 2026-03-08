@@ -47,9 +47,13 @@ interface PuzzleData {
 
 function GameContent() {
   const searchParams = useSearchParams();
-  const isDemoMode = useMemo(
-    () => searchParams.get("demo") === "1",
+  const demoParam = useMemo(
+    () => searchParams.get("demo"),
     [searchParams]
+  );
+  const isDemoMode = useMemo(
+    () => demoParam !== null,
+    [demoParam]
   );
   const [puzzle, setPuzzle] = useState<PuzzleData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -68,7 +72,7 @@ function GameContent() {
     setLoading(true);
     setError(null);
     try {
-      const url = isDemoMode ? "/api/puzzle/daily?demo=1" : "/api/puzzle/daily";
+      const url = demoParam ? `/api/puzzle/daily?demo=${demoParam}` : "/api/puzzle/daily";
       const res = await fetch(url, { cache: "no-store", credentials: "include" });
       const json = await res.json();
       if (json.success) {
@@ -76,13 +80,21 @@ function GameContent() {
         setPuzzle(data);
         const prevGuess = data.userGuess;
         const lastAttempt = prevGuess?.guessHistory?.[prevGuess.guessHistory.length - 1];
+        const numHands = (data.hands as Hand[]).length;
+        const defaultPercent = Math.floor(100 / numHands);
         setGuesses(
           lastAttempt
             ? Object.fromEntries(
                 lastAttempt.guesses.map((g: { position: number; percent: number }) => [g.position, g.percent])
               )
             : Object.fromEntries(
-                (data.hands as Hand[]).map((h) => [h.position, 25])
+                (data.hands as Hand[]).map((h, idx) => {
+                  // Make last hand equal to 100 - sum of others to ensure total = 100
+                  if (idx === numHands - 1) {
+                    return [h.position, 100 - defaultPercent * (numHands - 1)];
+                  }
+                  return [h.position, defaultPercent];
+                })
               )
         );
         if (prevGuess?.pausedElapsedSeconds != null && prevGuess.pausedElapsedSeconds > 0) {
@@ -356,7 +368,9 @@ function GameContent() {
 
   return (
     <div className="flex justify-center items-center w-full flex-1 min-h-0 flex flex-col">
-      <main className="flex-1 flex flex-col min-h-0 p-2 sm:p-4 w-full max-w-[96vw] gap-0">
+      <main className={`flex-1 flex flex-col min-h-0 p-2 sm:p-4 w-full gap-0 ${
+        puzzle.hands.length === 5 ? 'max-w-full' : 'max-w-[96vw]'
+      }`}>
       {showTutorial && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-2 sm:p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 max-w-sm shadow-xl">
@@ -483,15 +497,15 @@ function GameContent() {
               const canDecrease = v > handMin;
               const canIncrease = v < handMax;
               return (
-              <div key={hand.position} className="flex items-center gap-1.5 sm:gap-3 justify-center">
-                <div className="flex-initial max-w-[280px] sm:max-w-[360px]">
+              <div key={hand.position} className="flex items-center gap-1.5 sm:gap-3 justify-center w-full">
+                <div className="flex-1 min-w-0 max-w-[280px] sm:max-w-[360px]">
                   <PokerHand
                     cards={hand.cards}
                     showPercent={false}
                     size="large"
                   />
                 </div>
-                <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                   <button
                     type="button"
                     disabled={!canDecrease}
@@ -593,7 +607,7 @@ function GameContent() {
                       <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                         Guess {attempt.attempt}:
                       </p>
-                      <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
                         {byPosition.map((g) => {
                           const hand = puzzle.hands.find(
                             (h) => h.position === g.position
@@ -606,6 +620,7 @@ function GameContent() {
                               feedback={g.feedback}
                               guessedPercent={g.percent}
                               showFeedbackEmoji
+                              handCount={puzzle.hands.length}
                             />
                           );
                         })}

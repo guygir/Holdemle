@@ -1,8 +1,9 @@
 export function validateGuesses(
-  guesses: Array<{ position: number; percent: number }>
+  guesses: Array<{ position: number; percent: number }>,
+  expectedHandCount: number = 4
 ): { valid: boolean; error?: string } {
-  if (guesses.length !== 4) {
-    return { valid: false, error: "Must have exactly 4 guesses" };
+  if (guesses.length !== expectedHandCount) {
+    return { valid: false, error: `Must have exactly ${expectedHandCount} guesses` };
   }
 
   const total = guesses.reduce((sum, g) => sum + g.percent, 0);

@@ -86,7 +86,7 @@ export function ResultsDisplay({
         <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
           Correct:
         </p>
-        <div className="grid grid-cols-4 gap-1 sm:gap-2">
+        <div className="flex flex-wrap gap-1 sm:gap-2 w-full">
           {byPositionActual.map((a) => {
             const hand = hands.find((h) => h.position === a.position);
             if (!hand) return null;
@@ -99,24 +99,24 @@ export function ResultsDisplay({
               : 0;
             const isCorrect = diff === 0;
             return (
-              <div
-                key={a.position}
-                className={`flex flex-col items-center gap-1 p-2 sm:p-3 lg:p-4 rounded-lg border min-w-0 ${
-                  isCorrect ? "bg-[#6aaa64] border-[#5a9a54] text-white" : "bg-[#dc2626] border-[#b91c1c] text-white"
-                }`}
-              >
-                <div className="flex gap-0.5 sm:gap-1 lg:gap-2 flex-shrink-0">
+            <div
+              key={a.position}
+              className={`flex flex-col items-center gap-0 rounded-lg border p-2 sm:p-3 lg:p-4 flex-1 min-w-0 ${
+                isCorrect ? "bg-[#6aaa64] border-[#5a9a54] text-white" : "bg-[#dc2626] border-[#b91c1c] text-white"
+              }`}
+            >
+                <div className="flex flex-shrink-0 gap-0.5 sm:gap-1 lg:gap-2">
                   {hand.cards.map((card) => (
                     <div
                       key={card}
-                      className="w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 rounded flex flex-col items-center justify-center text-xs sm:text-sm lg:text-base font-bold bg-white dark:bg-white border border-[#d3d6da] dark:border-[#d3d6da]"
+                      className="rounded flex flex-col items-center justify-center font-bold bg-white dark:bg-white border border-[#d3d6da] dark:border-[#d3d6da] w-8 h-11 sm:w-10 sm:h-14 lg:w-12 lg:h-16 xl:w-14 xl:h-20 text-xs sm:text-sm lg:text-base"
                       style={{ color: getCardColor(card, scheme) }}
                     >
                       {cardToDisplay(card)}
                     </div>
                   ))}
                 </div>
-                <div className="shrink-0 text-center flex flex-row items-center justify-center gap-1 font-semibold text-sm sm:text-base lg:text-lg">
+                <div className="shrink-0 text-center flex flex-row items-center justify-center gap-0 font-semibold text-sm sm:text-base lg:text-lg">
                   <span className="font-bold text-white">
                     {actual}%
                   </span>
@@ -145,7 +145,13 @@ export function ResultsDisplay({
               <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                 Guess {attempt.attempt}:
               </p>
-              <div className="grid grid-cols-4 gap-1 sm:gap-2">
+              <div className={`${
+                hands.length === 5
+                  ? 'flex flex-nowrap gap-0 overflow-x-auto w-full'
+                  : hands.length === 3
+                  ? 'w-full grid grid-cols-3 gap-1 sm:gap-2'
+                  : 'w-full grid grid-cols-4 gap-1 sm:gap-2'
+              }`}>
                 {byPosition.map((g) => {
                   const hand = hands.find((h) => h.position === g.position);
                   if (!hand) return null;
@@ -157,6 +163,7 @@ export function ResultsDisplay({
                       guessedPercent={g.percent}
                       showPercent
                       showFeedbackEmoji
+                      handCount={hands.length}
                     />
                   );
                 })}

@@ -80,26 +80,32 @@ export async function calculatePreFlopOdds(
 
 /**
  * Round odds to integers that sum to exactly 100.
- * Strategy: Round down the 2 closest to floor, round up the other 2.
+ * Strategy: Round down values closest to floor, round up the rest.
+ * Works with any number of hands (3, 4, 5, etc.)
  */
 export function roundToSum100(odds: number[]): number[] {
-  if (odds.length !== 4) {
-    throw new Error("roundToSum100 requires exactly 4 values");
-  }
-
+  const n = odds.length;
+  
+  // Calculate how many to round down vs up
+  const floorSum = odds.reduce((sum, odd) => sum + Math.floor(odd), 0);
+  const numToRoundUp = 100 - floorSum;
+  
+  // Sort by distance to ceiling (those closest to ceiling should be rounded up)
   const distances = odds.map((odd, i) => ({
     index: i,
     value: odd,
-    distanceToFloor: odd - Math.floor(odd),
+    distanceToCeil: Math.ceil(odd) - odd,
   }));
-
-  distances.sort((a, b) => a.distanceToFloor - b.distanceToFloor);
-
+  
+  distances.sort((a, b) => a.distanceToCeil - b.distanceToCeil);
+  
+  // Round up the closest ones to ceiling, round down the rest
   const rounded = odds.map((odd, i) => {
-    const shouldRoundDown = distances.slice(0, 2).some((d) => d.index === i);
-    return shouldRoundDown ? Math.floor(odd) : Math.ceil(odd);
+    const shouldRoundUp = distances.slice(0, numToRoundUp).some((d) => d.index === i);
+    return shouldRoundUp ? Math.ceil(odd) : Math.floor(odd);
   });
-
+  
+  // Verify sum is exactly 100
   const sum = rounded.reduce((a, b) => a + b, 0);
   if (sum !== 100) {
     // Fallback: adjust the largest value
@@ -107,6 +113,6 @@ export function roundToSum100(odds: number[]): number[] {
     const maxIdx = rounded.indexOf(Math.max(...rounded));
     rounded[maxIdx] += diff;
   }
-
+  
   return rounded;
 }
