@@ -115,6 +115,9 @@ export default async function Home() {
         </div>
 
         <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-6 sm:gap-10">
+          {/* Community Poll */}
+          <PollWidget pollId="a0000000-0000-0000-0000-000000000001" />
+          
           {/* Daily Players Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
             <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">
@@ -124,9 +127,6 @@ export default async function Home() {
               <DailyPlaysChart />
             </div>
           </div>
-          
-          {/* Community Poll */}
-          <PollWidget pollId="a0000000-0000-0000-0000-000000000001" />
           
           {/* Latest Updates */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
