@@ -17,10 +17,11 @@ import {
   roundToSum100,
 } from "@/lib/poker/odds-calculator";
 import {
-  generateFourHandsWithFamilies,
+  generateNHandsWithFamilies,
   DEFAULT_HAND_FAMILY_WEIGHTS,
   type HandFamily,
 } from "@/lib/poker/hand-families";
+import { sampleHandCount } from "@/lib/puzzle-generation";
 
 function parseWeights(): Record<HandFamily, number> {
   const raw = process.env.HAND_FAMILY_WEIGHTS;
@@ -101,10 +102,11 @@ export async function GET(request: NextRequest) {
     }
 
     const weights = parseWeights();
+    const n = sampleHandCount();
     let hands: [string, string][] | null = null;
     let odds: number[] = [];
     for (let attempt = 0; attempt < 50; attempt++) {
-      hands = generateFourHandsWithFamilies(weights);
+      hands = generateNHandsWithFamilies(n, weights);
       if (!hands) continue;
       odds = calculatePreFlopOddsExhaustive(hands);
       if (odds.every((o) => o >= 5 && o <= 50)) break;

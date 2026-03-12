@@ -1,6 +1,7 @@
 "use client";
 
 import { PokerHand } from "./PokerHand";
+import { FlopDisplay } from "./FlopDisplay";
 import { cardToDisplay } from "@/lib/poker/deck";
 import { getCardColor } from "@/lib/deck-colors";
 import { useDeckColors } from "@/components/DeckColorProvider";
@@ -26,6 +27,7 @@ function formatTime(seconds: number): string {
 interface ResultsDisplayProps {
   guessHistory: GuessAttempt[];
   hands: Array<{ position: number; cards: [string, string] }>;
+  flop?: [string, string, string];
   actualPercentages: Array<{ position: number; percent: number }>;
   guessesUsed: number;
   isSolved: boolean;
@@ -37,6 +39,7 @@ interface ResultsDisplayProps {
 export function ResultsDisplay({
   guessHistory,
   hands,
+  flop,
   actualPercentages,
   guessesUsed,
   isSolved,
@@ -83,6 +86,11 @@ export function ResultsDisplay({
 
       {/* Correct row - on TOP */}
       <div className="flex flex-col gap-1 pt-1 border-t border-[#d3d6da] dark:border-gray-600">
+        {flop && (
+          <div className="mb-2">
+            <FlopDisplay flop={flop} />
+          </div>
+        )}
         <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
           Correct:
         </p>

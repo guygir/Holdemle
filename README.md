@@ -10,6 +10,7 @@ A daily poker puzzle game inspired by Wordle. Guess the pre-flop winning percent
 - v1.2 - Added Dark Mode
 - v1.3 - Improved UI/UX: Guess Bounds, 4-Color Decks
 - v1.4 - Added Community Poll and 3-hand, 5-hand Demos
+- v1.5 - Added Post-Flop Demo and 3-hand, 5-hand Puzzles
 <!-- VERSION_SECTION_END -->
 
 ## Quick Start

@@ -48,6 +48,43 @@ export function calculatePreFlopOddsExhaustive(
 }
 
 /**
+ * Calculate post-flop equity for hands given a known flop.
+ * Enumerates all C(41,2) = 820 turn+river combinations. Exact equity.
+ * Correctly splits ties (1/numWinners per board).
+ */
+export function calculatePostFlopOddsExhaustive(
+  hands: Array<[string, string]>,
+  flop: [string, string, string]
+): number[] {
+  const usedCards = [...hands.flat(), ...flop];
+  const deck = createDeck(usedCards);
+  const equity = new Array(hands.length).fill(0);
+  let count = 0;
+
+  const n = deck.length;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      const turn = deck[i];
+      const river = deck[j];
+      const board = [...flop, turn, river];
+
+      const handResults = hands.map((holeCards) =>
+        Hand.solve([...holeCards, ...board])
+      );
+      const winners = Hand.winners(handResults);
+      const winShare = 1 / winners.length;
+      winners.forEach((winner) => {
+        const idx = handResults.indexOf(winner);
+        equity[idx] += winShare;
+      });
+      count++;
+    }
+  }
+
+  return hands.map((_, i) => (equity[i] / count) * 100);
+}
+
+/**
  * Calculate pre-flop equity percentages for 4 hands.
  * Uses Monte Carlo (pokersolver) - 1M iterations in Node for accuracy.
  * Correctly splits ties (1/numWinners per board).

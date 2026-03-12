@@ -71,7 +71,12 @@ export async function POST(request: NextRequest) {
     );
   }
   // Demo puzzles can be submitted without auth (Try Demo flow)
-  if (puzzleId === "demo-puzzle" || puzzleId === "demo3-puzzle" || puzzleId === "demo5-puzzle") {
+  if (
+    puzzleId === "demo-puzzle" ||
+    puzzleId === "demo3-puzzle" ||
+    puzzleId === "demo5-puzzle" ||
+    puzzleId === "demo-flop-puzzle"
+  ) {
     // Determine expected hand count based on puzzle ID
     let demoHands: Array<{ position: number; actualPercent: number }>;
     if (puzzleId === "demo3-puzzle") {
@@ -87,6 +92,13 @@ export async function POST(request: NextRequest) {
         { position: 3, actualPercent: 16 },
         { position: 4, actualPercent: 14 },
         { position: 5, actualPercent: 14 },
+      ];
+    } else if (puzzleId === "demo-flop-puzzle") {
+      demoHands = [
+        { position: 1, actualPercent: 4 },
+        { position: 2, actualPercent: 8 },
+        { position: 3, actualPercent: 11 },
+        { position: 4, actualPercent: 77 },
       ];
     } else {
       demoHands = [

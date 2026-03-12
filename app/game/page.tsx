@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, Suspense } from "rea
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PokerHand } from "@/components/PokerHand";
+import { FlopDisplay } from "@/components/FlopDisplay";
 import { Timer } from "@/components/Timer";
 import { ResultsDisplay } from "@/components/ResultsDisplay";
 import { ShareButton } from "@/components/ShareButton";
@@ -22,6 +23,7 @@ interface PuzzleData {
   date: string;
   nickname?: string;
   hands: Hand[];
+  flop?: [string, string, string];
   difficulty: string;
   userHasGuessed: boolean;
     userGuess?: {
@@ -123,13 +125,21 @@ function GameContent() {
   // Pause timer when leaving the page (only for real game, in-progress)
   const isGameOver = puzzle?.userGuess?.isSolved || (puzzle?.userGuess?.guessesUsed ?? 0) >= MAX_GUESSES;
   pauseStateRef.current =
-    !isDemoMode && puzzle?.puzzleId && puzzle.puzzleId !== "demo-puzzle" && !isGameOver
+    !isDemoMode &&
+      puzzle?.puzzleId &&
+      !["demo-puzzle", "demo3-puzzle", "demo5-puzzle", "demo-flop-puzzle"].includes(puzzle.puzzleId) &&
+      !isGameOver
       ? { puzzleId: puzzle.puzzleId, startTime }
       : null;
 
   // Play session: start on load, pause on hide (sendBeacon for tab close), resume on show
   useEffect(() => {
-    if (isDemoMode || !puzzle?.puzzleId || puzzle.puzzleId === "demo-puzzle") return;
+    if (
+      isDemoMode ||
+      !puzzle?.puzzleId ||
+      ["demo-puzzle", "demo3-puzzle", "demo5-puzzle", "demo-flop-puzzle"].includes(puzzle.puzzleId)
+    )
+      return;
     if (isGameOver) return;
 
     const puzzleId = puzzle.puzzleId;
@@ -198,7 +208,13 @@ function GameContent() {
 
   // Send "start" when game loads (in-progress, real puzzle)
   useEffect(() => {
-    if (isDemoMode || !puzzle?.puzzleId || puzzle.puzzleId === "demo-puzzle" || isGameOver) return;
+    if (
+      isDemoMode ||
+      !puzzle?.puzzleId ||
+      ["demo-puzzle", "demo3-puzzle", "demo5-puzzle", "demo-flop-puzzle"].includes(puzzle.puzzleId) ||
+      isGameOver
+    )
+      return;
     fetch("/api/puzzle/play-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -366,6 +382,8 @@ function GameContent() {
     return null;
   }
 
+  const hasFlop = !!puzzle.flop;
+
   return (
     <div className="flex justify-center items-center w-full flex-1 min-h-0 flex flex-col">
       <main className={`flex-1 flex flex-col min-h-0 p-2 sm:p-4 w-full gap-0 ${
@@ -378,7 +396,7 @@ function GameContent() {
               How to Play
             </h2>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
-              Guess the pre-flop win percentages for 4 poker hands. Your guesses
+              Guess the {hasFlop ? "post-flop" : "pre-flop"} win percentages for 4 poker hands. Your guesses
               must sum to <strong>100%</strong>. You get{" "}
               <strong>{MAX_GUESSES} guesses</strong>.
             </p>
@@ -451,6 +469,7 @@ function GameContent() {
           <ResultsDisplay
             guessHistory={puzzle.userGuess.guessHistory}
             hands={puzzle.hands}
+            flop={puzzle.flop}
             actualPercentages={puzzle.userGuess.actualPercentages}
             guessesUsed={puzzle.userGuess.guessesUsed}
             isSolved={puzzle.userGuess.isSolved}
@@ -487,10 +506,17 @@ function GameContent() {
             <Timer startTime={startTime} pausedSeconds={pausedElapsedSeconds} className="font-mono text-xs sm:text-base lg:text-xl" />
           </div>
 
-          <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center">
+          <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4 flex flex-col items-center w-full">
             <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 text-center mb-1">
-              Guess each hand&apos;s preflop equity (%)
+              Guess each hand&apos;s {hasFlop ? "post-flop" : "preflop"} equity (%)
             </p>
+            {hasFlop && (
+              <div className="flex items-center justify-center w-full">
+                <div className="flex-1 min-w-0 max-w-[280px] sm:max-w-[360px] rounded-lg border bg-[#f6f7f8] dark:bg-gray-700 border-[#d3d6da] dark:border-gray-600 p-2 sm:p-3 lg:p-4 flex items-center justify-center gap-1 sm:gap-2 lg:gap-3">
+                  <FlopDisplay flop={puzzle.flop!} />
+                </div>
+              </div>
+            )}
             {puzzle.hands.map((hand) => {
               const { min: handMin, max: handMax } = handBounds[hand.position] ?? { min: 0, max: 100 };
               const v = guesses[hand.position] ?? handMin;

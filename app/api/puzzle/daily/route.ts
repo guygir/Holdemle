@@ -41,6 +41,20 @@ const DEMO5_PUZZLE = {
   difficulty: "hard",
 };
 
+// 4 hands + flop (post-flop equity) - 99 has set on Th 9h 2d
+const DEMO_FLOP_PUZZLE = {
+  id: "demo-flop-puzzle",
+  puzzle_date: new Date().toISOString().split("T")[0],
+  flop: ["Th", "9h", "2d"] as [string, string, string],
+  hands: [
+    { position: 1, cards: ["As", "Kh"], actualPercent: 4 },
+    { position: 2, cards: ["Qd", "Qc"], actualPercent: 8 },
+    { position: 3, cards: ["Jh", "Js"], actualPercent: 11 },
+    { position: 4, cards: ["9c", "9d"], actualPercent: 77 },
+  ],
+  difficulty: "medium",
+};
+
 export async function GET(request: Request) {
   const demoParam = new URL(request.url).searchParams.get("demo");
   const useDemo = getUseDemo();
@@ -56,28 +70,43 @@ export async function GET(request: Request) {
   }
   
   // Select demo puzzle based on parameter
-  let demoPuzzle = DEMO_PUZZLE;
+  let demoPuzzle = DEMO_PUZZLE as
+    | typeof DEMO_PUZZLE
+    | typeof DEMO3_PUZZLE
+    | typeof DEMO5_PUZZLE
+    | typeof DEMO_FLOP_PUZZLE;
   if (demoParam === "3") {
     demoPuzzle = DEMO3_PUZZLE;
   } else if (demoParam === "5") {
     demoPuzzle = DEMO5_PUZZLE;
+  } else if (demoParam === "flop") {
+    demoPuzzle = DEMO_FLOP_PUZZLE;
   }
-  
+
   if (useDemo || demoParam) {
-    return NextResponse.json({
-      success: true,
-      data: {
-        puzzleId: demoPuzzle.id,
-        date: demoPuzzle.puzzle_date,
-        hands: demoPuzzle.hands.map((h) => ({
-          position: h.position,
-          cards: h.cards,
-        })),
-        difficulty: demoPuzzle.difficulty,
-        userHasGuessed: false,
-        userGuess: undefined,
-      },
-    });
+    const response: {
+      puzzleId: string;
+      date: string;
+      hands: Array<{ position: number; cards: string[] }>;
+      difficulty: string;
+      flop?: [string, string, string];
+      userHasGuessed: boolean;
+      userGuess: undefined;
+    } = {
+      puzzleId: demoPuzzle.id,
+      date: demoPuzzle.puzzle_date,
+      hands: demoPuzzle.hands.map((h) => ({
+        position: h.position,
+        cards: h.cards,
+      })),
+      difficulty: demoPuzzle.difficulty,
+      userHasGuessed: false,
+      userGuess: undefined,
+    };
+    if ("flop" in demoPuzzle && demoPuzzle.flop) {
+      response.flop = demoPuzzle.flop;
+    }
+    return NextResponse.json({ success: true, data: response });
   }
 
   const supabase = await createServerSupabaseClient();

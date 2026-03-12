@@ -4,6 +4,7 @@ import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
 import SuggestionBox from "@/components/SuggestionBox";
 import PollWidget from "@/components/PollWidget";
+import { getHandCountDistribution } from "@/lib/puzzle-generation";
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -42,18 +43,24 @@ export default async function Home() {
               >
                 Play Today's Puzzle
               </Link>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <Link
                   href="/game?demo=3"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#8dd484] dark:bg-[#7dc474] text-white font-semibold rounded-lg hover:bg-[#7dc474] dark:hover:bg-[#8dd484] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#f87171] dark:bg-[#ef4444] text-white font-semibold rounded-lg hover:bg-[#ef4444] dark:hover:bg-[#f87171] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Try 3-hand Mode
                 </Link>
                 <Link
                   href="/game?demo=5"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#3a7a34] dark:bg-[#2a6a24] text-white font-semibold rounded-lg hover:bg-[#2a6a24] dark:hover:bg-[#3a7a34] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#dc2626] dark:bg-[#b91c1c] text-white font-semibold rounded-lg hover:bg-[#b91c1c] dark:hover:bg-[#dc2626] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Try 5-hand Mode
+                </Link>
+                <Link
+                  href="/game?demo=flop"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#b91c1c] dark:bg-[#991b1b] text-white font-semibold rounded-lg hover:bg-[#991b1b] dark:hover:bg-[#b91c1c] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Try Flop Demo
                 </Link>
               </div>
               <Link
@@ -83,18 +90,24 @@ export default async function Home() {
               >
                 Try Demo (4 hands)
               </Link>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 <Link
                   href="/game?demo=3"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#8dd484] dark:bg-[#7dc474] text-white font-semibold rounded-lg hover:bg-[#7dc474] dark:hover:bg-[#8dd484] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#f87171] dark:bg-[#ef4444] text-white font-semibold rounded-lg hover:bg-[#ef4444] dark:hover:bg-[#f87171] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Demo (3 hands)
                 </Link>
                 <Link
                   href="/game?demo=5"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#3a7a34] dark:bg-[#2a6a24] text-white font-semibold rounded-lg hover:bg-[#2a6a24] dark:hover:bg-[#3a7a34] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#dc2626] dark:bg-[#b91c1c] text-white font-semibold rounded-lg hover:bg-[#b91c1c] dark:hover:bg-[#dc2626] transition-colors [touch-action:manipulation] flex items-center justify-center"
                 >
                   Demo (5 hands)
+                </Link>
+                <Link
+                  href="/game?demo=flop"
+                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#b91c1c] dark:bg-[#991b1b] text-white font-semibold rounded-lg hover:bg-[#991b1b] dark:hover:bg-[#b91c1c] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                >
+                  Try Flop Demo
                 </Link>
               </div>
               <Link
@@ -116,7 +129,7 @@ export default async function Home() {
 
         <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-6 sm:gap-10">
           {/* Community Poll */}
-          <PollWidget pollId="a0000000-0000-0000-0000-000000000001" />
+          <PollWidget pollId="a0000000-0000-0000-0000-000000000002" distribution={getHandCountDistribution()} />
           
           {/* Daily Players Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">

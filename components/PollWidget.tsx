@@ -17,9 +17,11 @@ interface PollData {
 
 interface PollWidgetProps {
   pollId: string;
+  /** Hand count distribution: { 3: %, 4: %, 5: % } for display */
+  distribution?: { 3: number; 4: number; 5: number };
 }
 
-export default function PollWidget({ pollId }: PollWidgetProps) {
+export default function PollWidget({ pollId, distribution }: PollWidgetProps) {
   const [pollData, setPollData] = useState<PollData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,18 +150,30 @@ export default function PollWidget({ pollId }: PollWidgetProps) {
     }
   }
 
+  const containerClass = "bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600";
+
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
+      <div className={containerClass}>
         <p className="text-center text-gray-600 dark:text-gray-400">Loading poll...</p>
+        {distribution && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            Poll 1 takeaway: {distribution[3]}% for 3-hand, {distribution[4]}% for 4-hand, {distribution[5]}% for 5-hand
+          </p>
+        )}
       </div>
     );
   }
 
   if (error || !pollData) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6">
+      <div className={containerClass}>
         <p className="text-center text-red-600 dark:text-red-400">{error || 'Failed to load poll'}</p>
+        {distribution && (
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+            Poll 1 takeaway: {distribution[3]}% for 3-hand, {distribution[4]}% for 4-hand, {distribution[5]}% for 5-hand
+          </p>
+        )}
       </div>
     );
   }
@@ -168,9 +182,9 @@ export default function PollWidget({ pollId }: PollWidgetProps) {
   const maxVotes = Math.max(...Object.values(results.voteCounts), 1);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
+    <div className={containerClass}>
       <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">
-        📊 Community Poll
+        📊 Community Poll 2: Post-Flop
       </h2>
 
       <p className="text-center text-base sm:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
@@ -229,6 +243,12 @@ export default function PollWidget({ pollId }: PollWidgetProps) {
           );
         })}
       </div>
+
+      {distribution && (
+        <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+          Poll 1 takeaway: {distribution[3]}% for 3-hand, {distribution[4]}% for 4-hand, {distribution[5]}% for 5-hand
+        </p>
+      )}
     </div>
   );
 }
