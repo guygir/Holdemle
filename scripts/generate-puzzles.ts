@@ -6,7 +6,7 @@
  * Requires: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
  *
  * Optional env:
- *   HAND_COUNT_DISTRIBUTION - JSON object, e.g. '{"3":25,"4":60,"5":15}' (must sum to 100)
+ *   PUZZLE_TYPE_DISTRIBUTION - JSON, e.g. '{"3":25,"4":35,"5":15,"4flop":25}' (must sum to 100)
  *   HAND_FAMILY_WEIGHTS - JSON object, e.g. '{"pocket_pairs":20,"connectors":15}'
  *     Families: all_ax, k4s_k6o, q6s_q8o, j8s_j10o, connectors, suited_one_gappers, pocket_pairs, random
  *   PUZZLE_DAYS - number of days to generate (default 30, overridden by arg)
@@ -18,6 +18,7 @@ config({ path: ".env.local" });
 import { createClient } from "@supabase/supabase-js";
 import {
   calculatePreFlopOddsExhaustive,
+  calculatePostFlopOddsExhaustive,
   roundToSum100,
 } from "../lib/poker/odds-calculator";
 import {
@@ -25,7 +26,8 @@ import {
   DEFAULT_HAND_FAMILY_WEIGHTS,
   type HandFamily,
 } from "../lib/poker/hand-families";
-import { sampleHandCount } from "../lib/puzzle-generation";
+import { createDeck, shuffleDeck } from "../lib/poker/deck";
+import { samplePuzzleType } from "../lib/puzzle-generation";
 
 function parseWeights(): Record<HandFamily, number> {
   const raw = process.env.HAND_FAMILY_WEIGHTS;
@@ -38,14 +40,24 @@ function parseWeights(): Record<HandFamily, number> {
   }
 }
 
-function generateHands(): [string, string][] {
+function generateFlop(usedCards: string[]): [string, string, string] {
+  const deck = shuffleDeck(createDeck(usedCards));
+  return [deck[0], deck[1], deck[2]];
+}
+
+function generateHands(): { hands: [string, string][]; flop?: [string, string, string] } {
   const weights = parseWeights();
-  const n = sampleHandCount();
+  const type = samplePuzzleType();
+  const n = type === "4flop" ? 4 : parseInt(type, 10);
   const hands = generateNHandsWithFamilies(n, weights);
   if (!hands) {
     throw new Error(`Failed to generate ${n} non-overlapping hands`);
   }
-  return hands;
+  if (type === "4flop") {
+    const flop = generateFlop(hands.flat());
+    return { hands, flop };
+  }
+  return { hands };
 }
 
 function calculateDifficulty(odds: number[]): "easy" | "medium" | "hard" {
@@ -81,8 +93,11 @@ async function main() {
     puzzleDate.setDate(startDate.getDate() + i);
     const dateStr = puzzleDate.toISOString().split("T")[0];
 
-    let hands = generateHands();
-    console.log(`${dateStr} - ${hands.length}-hand:`, hands.map(([a, b]) => `${a}${b}`).join(" "));
+    let gen = generateHands();
+    let hands = gen.hands;
+    let flop = gen.flop;
+    const typeLabel = flop ? "4-hand post-flop" : `${hands.length}-hand`;
+    console.log(`${dateStr} - ${typeLabel}:`, hands.map(([a, b]) => `${a}${b}`).join(" "), flop ? `flop: ${flop.join(" ")}` : "");
 
     const { data: existing } = await supabase
       .from("puzzles")
@@ -100,10 +115,14 @@ async function main() {
 
     do {
       if (attempts > 0) {
-        hands = generateHands();
-        console.log(`${dateStr} - ${hands.length}-hand (retry):`, hands.map(([a, b]) => `${a}${b}`).join(" "));
+        gen = generateHands();
+        hands = gen.hands;
+        flop = gen.flop;
+        console.log(`${dateStr} - ${flop ? "4-hand post-flop" : hands.length + "-hand"} (retry):`, hands.map(([a, b]) => `${a}${b}`).join(" "), flop ? `flop: ${flop.join(" ")}` : "");
       }
-      odds = calculatePreFlopOddsExhaustive(hands);
+      odds = flop
+        ? calculatePostFlopOddsExhaustive(hands, flop)
+        : calculatePreFlopOddsExhaustive(hands);
       attempts++;
       if (attempts > 50) {
         console.error("Could not generate valid puzzle for", dateStr);
@@ -120,11 +139,14 @@ async function main() {
       actualPercent: rounded[idx],
     }));
 
-    const { error } = await supabase.from("puzzles").insert({
+    const insertPayload: Record<string, unknown> = {
       puzzle_date: dateStr,
       hands: puzzleHands,
       difficulty,
-    });
+    };
+    if (flop) insertPayload.flop = flop;
+
+    const { error } = await supabase.from("puzzles").insert(insertPayload);
 
     if (error) {
       console.error(`Error for ${dateStr}:`, error);

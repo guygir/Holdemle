@@ -49,14 +49,9 @@ interface PuzzleData {
 
 function GameContent() {
   const searchParams = useSearchParams();
-  const demoParam = useMemo(
-    () => searchParams.get("demo"),
-    [searchParams]
-  );
-  const isDemoMode = useMemo(
-    () => demoParam !== null,
-    [demoParam]
-  );
+  const demoParam = useMemo(() => searchParams.get("demo"), [searchParams]);
+  const vParam = useMemo(() => searchParams.get("v"), [searchParams]);
+  const isDemoMode = useMemo(() => demoParam !== null, [demoParam]);
   const [puzzle, setPuzzle] = useState<PuzzleData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +69,11 @@ function GameContent() {
     setLoading(true);
     setError(null);
     try {
-      const url = demoParam ? `/api/puzzle/daily?demo=${demoParam}` : "/api/puzzle/daily";
+      const url = vParam
+        ? `/api/puzzle/daily?v=${vParam}`
+        : demoParam
+          ? `/api/puzzle/daily?demo=${demoParam}`
+          : "/api/puzzle/daily";
       const res = await fetch(url, { cache: "no-store", credentials: "include" });
       const json = await res.json();
       if (json.success) {
@@ -116,16 +115,18 @@ function GameContent() {
     } finally {
       setLoading(false);
     }
-  }, [isDemoMode]);
+  }, [demoParam, vParam]);
 
   useEffect(() => {
     fetchPuzzle();
   }, [fetchPuzzle]);
 
   // Pause timer when leaving the page (only for real game, in-progress)
+  const isTestPuzzle = puzzle?.puzzleId?.startsWith("test-v");
   const isGameOver = puzzle?.userGuess?.isSolved || (puzzle?.userGuess?.guessesUsed ?? 0) >= MAX_GUESSES;
   pauseStateRef.current =
     !isDemoMode &&
+      !isTestPuzzle &&
       puzzle?.puzzleId &&
       !["demo-puzzle", "demo3-puzzle", "demo5-puzzle", "demo-flop-puzzle"].includes(puzzle.puzzleId) &&
       !isGameOver
@@ -193,7 +194,7 @@ function GameContent() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pagehide", sendPause);
     };
-  }, [isDemoMode, puzzle?.puzzleId, isGameOver, startTime]);
+  }, [isDemoMode, isTestPuzzle, puzzle?.puzzleId, isGameOver, startTime]);
 
   useEffect(() => {
     return () => {
@@ -210,6 +211,7 @@ function GameContent() {
   useEffect(() => {
     if (
       isDemoMode ||
+      isTestPuzzle ||
       !puzzle?.puzzleId ||
       ["demo-puzzle", "demo3-puzzle", "demo5-puzzle", "demo-flop-puzzle"].includes(puzzle.puzzleId) ||
       isGameOver
@@ -221,7 +223,7 @@ function GameContent() {
       body: JSON.stringify({ puzzleId: puzzle.puzzleId, event: "start" }),
       credentials: "include",
     }).catch(() => {});
-  }, [isDemoMode, puzzle?.puzzleId, isGameOver]);
+  }, [isDemoMode, isTestPuzzle, puzzle?.puzzleId, isGameOver]);
 
   useEffect(() => {
     if (isDemoMode && puzzle && typeof window !== "undefined") {
@@ -501,7 +503,7 @@ function GameContent() {
         </div>
       ) : (
         <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-          <div className="mb-1 sm:mb-2 flex justify-between text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">
+          <div className="mb-1 sm:mb-2 flex justify-between items-center text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200 pr-14">
             <span>Guess {attemptNumber} of {MAX_GUESSES}</span>
             <Timer startTime={startTime} pausedSeconds={pausedElapsedSeconds} className="font-mono text-xs sm:text-base lg:text-xl" />
           </div>

@@ -48,7 +48,7 @@ export function PokerHand({
       } gap-1 sm:gap-2 p-2 sm:p-3 lg:p-4 flex-1 min-w-0 ${
         isLarge ? "min-w-[200px] sm:min-w-[260px] lg:min-w-[320px]" : ""
       } ${isLarge && !showPercent ? "justify-center" : ""} ${
-        feedback ? feedbackColors[feedback] : "bg-[#f6f7f8] border-[#d3d6da]"
+        feedback ? feedbackColors[feedback] : "bg-[#f6f7f8] dark:bg-gray-700 border-[#d3d6da] dark:border-gray-600"
       }`}
     >
       <div className={`flex ${

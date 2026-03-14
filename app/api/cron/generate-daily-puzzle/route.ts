@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   calculatePreFlopOddsExhaustive,
+  calculatePostFlopOddsExhaustive,
   roundToSum100,
 } from "@/lib/poker/odds-calculator";
 import {
@@ -21,7 +22,8 @@ import {
   DEFAULT_HAND_FAMILY_WEIGHTS,
   type HandFamily,
 } from "@/lib/poker/hand-families";
-import { sampleHandCount } from "@/lib/puzzle-generation";
+import { createDeck, shuffleDeck } from "@/lib/poker/deck";
+import { samplePuzzleType } from "@/lib/puzzle-generation";
 
 function parseWeights(): Record<HandFamily, number> {
   const raw = process.env.HAND_FAMILY_WEIGHTS;
@@ -102,13 +104,20 @@ export async function GET(request: NextRequest) {
     }
 
     const weights = parseWeights();
-    const n = sampleHandCount();
+    const type = samplePuzzleType();
+    const n = type === "4flop" ? 4 : parseInt(type, 10);
     let hands: [string, string][] | null = null;
+    let flop: [string, string, string] | undefined;
     let odds: number[] = [];
     for (let attempt = 0; attempt < 50; attempt++) {
       hands = generateNHandsWithFamilies(n, weights);
       if (!hands) continue;
-      odds = calculatePreFlopOddsExhaustive(hands);
+      if (type === "4flop") {
+        flop = shuffleDeck(createDeck(hands.flat())).slice(0, 3) as [string, string, string];
+        odds = calculatePostFlopOddsExhaustive(hands, flop);
+      } else {
+        odds = calculatePreFlopOddsExhaustive(hands);
+      }
       if (odds.every((o) => o >= 5 && o <= 50)) break;
     }
 
@@ -127,13 +136,16 @@ export async function GET(request: NextRequest) {
       actualPercent: rounded[idx],
     }));
 
+    const insertPayload: Record<string, unknown> = {
+      puzzle_date: dateStr,
+      hands: puzzleHands,
+      difficulty,
+    };
+    if (flop) insertPayload.flop = flop;
+
     const { data: puzzle, error } = await supabase
       .from("puzzles")
-      .insert({
-        puzzle_date: dateStr,
-        hands: puzzleHands,
-        difficulty,
-      })
+      .insert(insertPayload)
       .select()
       .single();
 

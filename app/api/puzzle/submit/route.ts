@@ -70,22 +70,25 @@ export async function POST(request: NextRequest) {
       { status: 503 }
     );
   }
-  // Demo puzzles can be submitted without auth (Try Demo flow)
-  if (
+  // Demo and test puzzles can be submitted without auth
+  const isDemoOrTest =
     puzzleId === "demo-puzzle" ||
     puzzleId === "demo3-puzzle" ||
     puzzleId === "demo5-puzzle" ||
-    puzzleId === "demo-flop-puzzle"
-  ) {
-    // Determine expected hand count based on puzzle ID
+    puzzleId === "demo-flop-puzzle" ||
+    puzzleId === "test-v1-puzzle" ||
+    puzzleId === "test-v2-puzzle" ||
+    puzzleId === "test-v3-puzzle" ||
+    puzzleId === "test-v4-puzzle";
+  if (isDemoOrTest) {
     let demoHands: Array<{ position: number; actualPercent: number }>;
-    if (puzzleId === "demo3-puzzle") {
+    if (puzzleId === "demo3-puzzle" || puzzleId === "test-v1-puzzle") {
       demoHands = [
         { position: 1, actualPercent: 70 },
         { position: 2, actualPercent: 18 },
         { position: 3, actualPercent: 12 },
       ];
-    } else if (puzzleId === "demo5-puzzle") {
+    } else if (puzzleId === "demo5-puzzle" || puzzleId === "test-v3-puzzle") {
       demoHands = [
         { position: 1, actualPercent: 25 },
         { position: 2, actualPercent: 31 },
@@ -93,7 +96,7 @@ export async function POST(request: NextRequest) {
         { position: 4, actualPercent: 14 },
         { position: 5, actualPercent: 14 },
       ];
-    } else if (puzzleId === "demo-flop-puzzle") {
+    } else if (puzzleId === "demo-flop-puzzle" || puzzleId === "test-v4-puzzle") {
       demoHands = [
         { position: 1, actualPercent: 4 },
         { position: 2, actualPercent: 8 },
@@ -101,6 +104,7 @@ export async function POST(request: NextRequest) {
         { position: 4, actualPercent: 77 },
       ];
     } else {
+      // demo-puzzle or test-v2-puzzle (4-hand preflop)
       demoHands = [
         { position: 1, actualPercent: 30 },
         { position: 2, actualPercent: 38 },

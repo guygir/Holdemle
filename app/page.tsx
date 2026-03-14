@@ -4,7 +4,7 @@ import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
 import SuggestionBox from "@/components/SuggestionBox";
 import PollWidget from "@/components/PollWidget";
-import { getHandCountDistribution } from "@/lib/puzzle-generation";
+import { getPuzzleTypeDistribution } from "@/lib/puzzle-generation";
 
 export default async function Home() {
   const supabase = await createServerSupabaseClient();
@@ -128,8 +128,8 @@ export default async function Home() {
         </div>
 
         <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-6 sm:gap-10">
-          {/* Community Poll */}
-          <PollWidget pollId="a0000000-0000-0000-0000-000000000002" distribution={getHandCountDistribution()} />
+          {/* Community Polls */}
+          <PollWidget puzzleTypeDistribution={getPuzzleTypeDistribution()} />
           
           {/* Daily Players Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">

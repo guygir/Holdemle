@@ -32,12 +32,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // When using Supabase, require auth to play (unless Try Demo: ?demo=1/3/5)
+  // When using Supabase, require auth to play (unless Try Demo or Test: ?demo=1/3/5/flop or ?v=1..4)
   if (request.nextUrl.pathname === "/game" && !user) {
     const demoParam = request.nextUrl.searchParams.get("demo");
+    const vParam = request.nextUrl.searchParams.get("v");
     const isDemoTry =
       demoParam === "1" || demoParam === "3" || demoParam === "5" || demoParam === "flop";
-    if (!isDemoTry) {
+    const isTestTry = vParam === "1" || vParam === "2" || vParam === "3" || vParam === "4";
+    if (!isDemoTry && !isTestTry) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("redirect", "/game");
       return NextResponse.redirect(loginUrl);
