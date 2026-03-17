@@ -14,7 +14,7 @@ import {
 
 type FeedbackType = "exact" | "high" | "low";
 
-/** Sum of |guessed - actual| over all 4 hands for the final attempt */
+/** Sum of |guessed - actual| over all hands for the final attempt */
 function computePercentDiff(
   feedback: Array<{ position: number; percent: number }>,
   actuals: Array<{ position: number; percent: number }>
@@ -180,14 +180,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const validation = validateGuesses(guesses);
-  if (!validation.valid) {
-    return NextResponse.json(
-      { success: false, error: validation.error },
-      { status: 400 }
-    );
-  }
-
   if (attemptNumber < 1 || attemptNumber > MAX_GUESSES) {
     return NextResponse.json(
       {
@@ -213,6 +205,19 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const hands = puzzle.hands as Array<{
+    position: number;
+    cards: string[];
+    actualPercent: number;
+  }>;
+  const validation = validateGuesses(guesses, hands.length);
+  if (!validation.valid) {
+    return NextResponse.json(
+      { success: false, error: validation.error },
+      { status: 400 }
+    );
+  }
+
   const currentDate = await getCurrentPuzzleDate(supabase);
   if (!currentDate || puzzle.puzzle_date !== currentDate) {
     return NextResponse.json(
@@ -221,11 +226,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const hands = puzzle.hands as Array<{
-    position: number;
-    cards: string[];
-    actualPercent: number;
-  }>;
   const actualPercents = Object.fromEntries(
     hands.map((h) => [h.position, h.actualPercent])
   );

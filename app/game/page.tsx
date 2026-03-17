@@ -398,7 +398,7 @@ function GameContent() {
               How to Play
             </h2>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
-              Guess the {hasFlop ? "post-flop" : "pre-flop"} win percentages for 4 poker hands. Your guesses
+              Guess the {hasFlop ? "post-flop" : "pre-flop"} win percentages for {puzzle.hands.length} poker hands. Your guesses
               must sum to <strong>100%</strong>. You get{" "}
               <strong>{MAX_GUESSES} guesses</strong>.
             </p>
