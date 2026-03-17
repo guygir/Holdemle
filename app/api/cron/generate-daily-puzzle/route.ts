@@ -105,6 +105,7 @@ export async function GET(request: NextRequest) {
 
     const weights = parseWeights();
     const type = samplePuzzleType();
+    console.log(`[cron] date=${dateStr} type=${type}`);
     const n = type === "4flop" ? 4 : parseInt(type, 10);
     let hands: [string, string][] | null = null;
     let flop: [string, string, string] | undefined;
@@ -114,14 +115,23 @@ export async function GET(request: NextRequest) {
       if (!hands) continue;
       if (type === "4flop") {
         flop = shuffleDeck(createDeck(hands.flat())).slice(0, 3) as [string, string, string];
-        odds = calculatePostFlopOddsExhaustive(hands, flop);
+      }
+      // Log chosen type/hands before expensive odds calc (helps debug timeouts)
+      console.log(`[cron] attempt=${attempt} type=${type} hands=${JSON.stringify(hands)}${flop ? ` flop=${JSON.stringify(flop)}` : ""}`);
+      if (type === "4flop") {
+        odds = calculatePostFlopOddsExhaustive(hands!, flop!);
       } else {
         odds = calculatePreFlopOddsExhaustive(hands);
       }
-      if (odds.every((o) => o >= 5 && o <= 50)) break;
+      const valid = odds.every((o) => o >= 5 && o <= 75);
+      if (valid) break;
+      const handStr = JSON.stringify(hands) + (flop ? ` flop=${JSON.stringify(flop)}` : "");
+      console.log(
+        `[cron] hands=${handStr} failed because % were ${JSON.stringify(odds.map((o) => Math.round(o * 10) / 10))} outside [5,75], retry ${attempt + 1}`
+      );
     }
 
-    if (!hands || odds.some((o) => o < 5 || o > 50)) {
+    if (!hands || odds.some((o) => o < 5 || o > 75)) {
       return NextResponse.json(
         { error: "Could not generate valid puzzle", date: dateStr },
         { status: 500 }
