@@ -44,7 +44,7 @@ export default async function Home() {
                 return (
                   <div className="rounded-lg border-2 border-red-500 bg-red-50 dark:bg-red-950/50 dark:border-red-400 p-3 text-center">
                     <p className="text-sm sm:text-base font-semibold text-red-600 dark:text-red-400">
-                      HOTFIX: Submit bug fixed — you can play now!
+                      HOTFIX: Submit bug fixed, dev was fired - you can play now!
                     </p>
                   </div>
                 );
