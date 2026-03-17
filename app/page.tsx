@@ -37,6 +37,18 @@ export default async function Home() {
         <div className="space-y-2 sm:space-y-4">
           {nickname ? (
             <>
+              {(() => {
+                const today = new Date().toISOString().split("T")[0];
+                const hotfixDate = "2026-03-17"; // Show only on this date; update or remove after
+                if (today !== hotfixDate) return null;
+                return (
+                  <div className="rounded-lg border-2 border-red-500 bg-red-50 dark:bg-red-950/50 dark:border-red-400 p-3 text-center">
+                    <p className="text-sm sm:text-base font-semibold text-red-600 dark:text-red-400">
+                      HOTFIX: Submit bug fixed — you can play now!
+                    </p>
+                  </div>
+                );
+              })()}
               <Link
                 href="/game"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#6aaa64] text-white font-semibold rounded-lg hover:bg-[#5a9a54] transition-colors [touch-action:manipulation] flex items-center justify-center"
