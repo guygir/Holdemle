@@ -55,26 +55,6 @@ export default async function Home() {
               >
                 Play Today's Puzzle
               </Link>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <Link
-                  href="/game?demo=3"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#f87171] dark:bg-[#ef4444] text-white font-semibold rounded-lg hover:bg-[#ef4444] dark:hover:bg-[#f87171] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Try 3-hand Mode
-                </Link>
-                <Link
-                  href="/game?demo=5"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#dc2626] dark:bg-[#b91c1c] text-white font-semibold rounded-lg hover:bg-[#b91c1c] dark:hover:bg-[#dc2626] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Try 5-hand Mode
-                </Link>
-                <Link
-                  href="/game?demo=flop"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#b91c1c] dark:bg-[#991b1b] text-white font-semibold rounded-lg hover:bg-[#991b1b] dark:hover:bg-[#b91c1c] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Try Flop Demo
-                </Link>
-              </div>
               <Link
                 href="/stats"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#85c0f9] dark:bg-[#5a9fd9] text-white font-semibold rounded-lg hover:bg-[#75b0e9] dark:hover:bg-[#6aafe9] transition-colors [touch-action:manipulation] flex items-center justify-center"
@@ -102,26 +82,6 @@ export default async function Home() {
               >
                 Try Demo (4 hands)
               </Link>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                <Link
-                  href="/game?demo=3"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#f87171] dark:bg-[#ef4444] text-white font-semibold rounded-lg hover:bg-[#ef4444] dark:hover:bg-[#f87171] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Demo (3 hands)
-                </Link>
-                <Link
-                  href="/game?demo=5"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#dc2626] dark:bg-[#b91c1c] text-white font-semibold rounded-lg hover:bg-[#b91c1c] dark:hover:bg-[#dc2626] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Demo (5 hands)
-                </Link>
-                <Link
-                  href="/game?demo=flop"
-                  className="block w-full min-h-[36px] sm:min-h-[44px] py-2 sm:py-3 text-sm sm:text-base lg:text-xl px-4 sm:px-6 bg-[#b91c1c] dark:bg-[#991b1b] text-white font-semibold rounded-lg hover:bg-[#991b1b] dark:hover:bg-[#b91c1c] transition-colors [touch-action:manipulation] flex items-center justify-center"
-                >
-                  Try Flop Demo
-                </Link>
-              </div>
               <Link
                 href="/leaderboard"
                 className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
@@ -133,13 +93,33 @@ export default async function Home() {
           <SuggestionBox isLoggedIn={!!user} />
           <Link
             href="/how-to-play"
-            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#f6f7f8] dark:bg-gray-700 text-[#1a1a1b] dark:text-gray-100 font-semibold rounded-lg border border-[#d3d6da] dark:border-gray-600 hover:bg-[#e8e9eb] dark:hover:bg-gray-600 transition-colors [touch-action:manipulation] flex items-center justify-center"
+            className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#f6f7f8] dark:bg-slate-800 text-[#1a1a1b] dark:text-gray-100 font-semibold rounded-lg border border-[#d3d6da] dark:border-slate-500 hover:bg-[#e8e9eb] dark:hover:bg-slate-700 transition-colors [touch-action:manipulation] flex items-center justify-center"
           >
             How to Play
           </Link>
         </div>
 
         <div className="pt-4 sm:pt-8 border-t border-[#d3d6da] dark:border-gray-600 w-full flex flex-col gap-6 sm:gap-10">
+          <div className="flex justify-center">
+            <a
+              href="https://ko-fi.com/guygir"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-pink-100 hover:bg-pink-200 dark:bg-[#1a2332] dark:hover:bg-[#13C3FF] dark:border-2 dark:border-[#13C3FF]/70 text-amber-900 dark:text-white font-semibold rounded-lg transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.06),0_0_28px_-4px_rgba(236,72,153,0.38)] dark:shadow-[0_0_20px_-4px_rgba(19,195,255,0.35)]"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="fill-amber-800 dark:fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden
+              >
+                <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z" />
+              </svg>
+              Buy me a cup of Ko-fi
+            </a>
+          </div>
           {/* Community Polls */}
           <PollWidget puzzleTypeDistribution={getPuzzleTypeDistribution()} />
           
