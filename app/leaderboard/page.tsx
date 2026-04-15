@@ -196,7 +196,9 @@ export default function LeaderboardPage() {
               const streak = d.currentStreak ?? 0;
               return (
                 <div key={e.userId + e.rank} className={podiumCardClass}>
-                  <div className={`grid min-w-0 grid-cols-5 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
+                  <div
+                    className={`grid min-w-0 grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)] gap-x-1 sm:gap-x-2 ${LB_INK}`}
+                  >
                     <div
                       className={`${LB_CELL} gap-1.5 sm:gap-2`}
                       title={d.username}
@@ -262,7 +264,7 @@ export default function LeaderboardPage() {
                     <div className={LB_CELL}>
                       <span className="min-w-0 leading-tight">
                         Wins: <span className="font-bold">{w.wins}</span> /{" "}
-                        {w.totalGames} games
+                        {w.totalGames}
                       </span>
                     </div>
                     <div className={LB_CELL}>
