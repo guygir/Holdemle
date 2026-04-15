@@ -7,11 +7,19 @@ import {
   countWins,
   getAverageGuessesIncludingLosses,
 } from "@/lib/utils/solved-distribution";
+import { calendarDayBefore } from "@/lib/streak";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type") || "daily";
-  const limit = Math.min(100, parseInt(searchParams.get("limit") || "50", 10));
+  const requestedLimit = Math.min(
+    100,
+    parseInt(searchParams.get("limit") || "50", 10)
+  );
+  const limit =
+    type === "alltime-maxstreak" || type === "alltime-wins"
+      ? Math.min(25, requestedLimit)
+      : requestedLimit;
 
   const useDemo = getUseDemo();
   if (useDemo === "fail") {
@@ -59,6 +67,7 @@ export async function GET(request: NextRequest) {
     "alltime-winpct",
     "alltime-avgguesses",
     "alltime-avgdiff",
+    "alltime-maxstreak",
   ];
   if (allTimeTypes.includes(type)) {
     const { MAX_GUESSES: maxGuesses } = await import("@/lib/game-config");
@@ -66,14 +75,14 @@ export async function GET(request: NextRequest) {
     const { data: stats, error: statsError } = await adminSupabase
       .from("user_stats")
       .select(
-        "user_id, total_games, solved_distribution, failed_games, average_percent_diff, total_score"
+        "user_id, total_games, solved_distribution, failed_games, average_percent_diff, total_score, max_streak, current_streak, last_played_date"
       );
 
     if (statsError) {
       console.error("Leaderboard user_stats fetch error:", statsError);
       return NextResponse.json({
         success: true,
-        data: { type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff", entries: [], userRank: undefined, isDemoMode: false },
+        data: { type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff" | "alltime-maxstreak", entries: [], userRank: undefined, isDemoMode: false },
       });
     }
 
@@ -107,6 +116,9 @@ export async function GET(request: NextRequest) {
       failed_games?: number;
       average_percent_diff?: number;
       total_score?: number;
+      max_streak?: number;
+      current_streak?: number;
+      last_played_date?: string | null;
     };
     type SortFn = (a: StatRow, b: StatRow) => number;
     const sortWins: SortFn = (a, b) => {
@@ -139,14 +151,26 @@ export async function GET(request: NextRequest) {
       return sortWins(a, b);
     };
 
+    const sortMaxStreak: SortFn = (a, b) => {
+      const msA = (a as StatRow).max_streak ?? 0;
+      const msB = (b as StatRow).max_streak ?? 0;
+      if (msB !== msA) return msB - msA;
+      const csA = (a as StatRow).current_streak ?? 0;
+      const csB = (b as StatRow).current_streak ?? 0;
+      if (csB !== csA) return csB - csA;
+      return sortWins(a, b);
+    };
+
     const sortFn =
-      type === "alltime-winpct"
-        ? sortWinPct
-        : type === "alltime-avgguesses"
-          ? sortAvgGuesses
-          : type === "alltime-avgdiff"
-            ? sortAvgDiff
-            : sortWins;
+      type === "alltime-maxstreak"
+        ? sortMaxStreak
+        : type === "alltime-winpct"
+          ? sortWinPct
+          : type === "alltime-avgguesses"
+            ? sortAvgGuesses
+            : type === "alltime-avgdiff"
+              ? sortAvgDiff
+              : sortWins;
 
     const filtered = (stats ?? []).filter((s) => (s.total_games ?? 0) > 0);
     const sorted = [...filtered].sort(sortFn).slice(0, limit);
@@ -158,10 +182,66 @@ export async function GET(request: NextRequest) {
       : { data: [] };
     const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
+    let puzzleDateToday: string | null = null;
+    let yesterdayStr: string | null = null;
+    const todayStatusByUser = new Map<
+      string,
+      "win" | "loss" | "didNotPlay"
+    >();
+
+    if (type === "alltime-maxstreak") {
+      const { getCurrentPuzzleDate } = await import("@/lib/puzzle");
+      puzzleDateToday = await getCurrentPuzzleDate(adminSupabase);
+      yesterdayStr =
+        puzzleDateToday != null ? calendarDayBefore(puzzleDateToday) : null;
+    }
+
+    if (type === "alltime-maxstreak" && userIds.length && puzzleDateToday) {
+      const { data: puzzleRow } = await adminSupabase
+        .from("puzzles")
+        .select("id")
+        .eq("puzzle_date", puzzleDateToday)
+        .maybeSingle();
+      if (puzzleRow?.id) {
+        const { MAX_GUESSES } = await import("@/lib/game-config");
+        const { data: todayGuesses } = await adminSupabase
+          .from("guesses")
+          .select("user_id, is_solved, guesses_used")
+          .eq("puzzle_id", puzzleRow.id)
+          .in("user_id", userIds);
+        const byUser = new Map(
+          (todayGuesses ?? []).map((g) => [g.user_id, g])
+        );
+        for (const uid of userIds) {
+          const g = byUser.get(uid);
+          if (!g) {
+            todayStatusByUser.set(uid, "didNotPlay");
+            continue;
+          }
+          const completed =
+            g.guesses_used > 0 &&
+            (g.is_solved || g.guesses_used >= MAX_GUESSES);
+          if (!completed) {
+            todayStatusByUser.set(uid, "didNotPlay");
+          } else {
+            todayStatusByUser.set(uid, g.is_solved ? "win" : "loss");
+          }
+        }
+      } else {
+        for (const uid of userIds) {
+          todayStatusByUser.set(uid, "didNotPlay");
+        }
+      }
+    } else if (type === "alltime-maxstreak" && userIds.length) {
+      for (const uid of userIds) {
+        todayStatusByUser.set(uid, "didNotPlay");
+      }
+    }
+
     const entries = sorted.map((s, i) => {
       const p = profileMap.get(s.user_id);
       const displayName = p ? p.nickname : `Player ${String(s.user_id).slice(0, 8)}`;
-      return {
+      const base = {
         rank: i + 1,
         userId: s.user_id,
         username: displayName,
@@ -172,6 +252,26 @@ export async function GET(request: NextRequest) {
         averagePercentDiff: parseFloat(String(s.average_percent_diff ?? 0)),
         totalScore: s.total_score,
       };
+      if (type === "alltime-maxstreak") {
+        const row = s as StatRow;
+        const lastPlayed = row.last_played_date ?? null;
+        const streakAlive =
+          puzzleDateToday != null &&
+          yesterdayStr != null &&
+          lastPlayed != null &&
+          (lastPlayed === puzzleDateToday || lastPlayed === yesterdayStr);
+        const displayCurrentStreak = streakAlive
+          ? (row.current_streak ?? 0)
+          : 0;
+        return {
+          ...base,
+          maxStreak: row.max_streak ?? 0,
+          currentStreak: displayCurrentStreak,
+          todayStatus:
+            todayStatusByUser.get(s.user_id) ?? "didNotPlay",
+        };
+      }
+      return base;
     });
 
     const userRank = user
@@ -181,7 +281,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff",
+        type: type as "alltime" | "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff" | "alltime-maxstreak",
         entries,
         userRank,
         isDemoMode: false,

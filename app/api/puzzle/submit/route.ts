@@ -11,6 +11,7 @@ import {
   incrementSolved,
   getAverageGuessesFromSolvedDistribution,
 } from "@/lib/utils/solved-distribution";
+import { calendarDayBefore } from "@/lib/streak";
 
 type FeedbackType = "exact" | "high" | "low";
 
@@ -429,9 +430,7 @@ async function updateUserStats(
     .single();
 
   const lastDate = stats?.last_played_date;
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split("T")[0];
+  const yesterdayStr = calendarDayBefore(params.puzzleDate);
   const currentStreak =
     lastDate === yesterdayStr
       ? (stats?.current_streak ?? 0) + 1

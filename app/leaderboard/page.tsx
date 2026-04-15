@@ -4,6 +4,48 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MAX_GUESSES } from "@/lib/game-config";
 
+/** Matches Today tab: show 🔥 when streak is at least this many days */
+const STREAK_FLAME_MIN = 3;
+
+const LB_INK = "text-[#1a1a1b] dark:text-gray-100";
+/** Shared cell: left-aligned; slight min-height so 2-line cells don’t make rows look uneven. */
+const LB_CELL =
+  "flex min-h-[3.25rem] sm:min-h-[3.5rem] lg:min-h-[3.75rem] min-w-0 items-center justify-start px-0.5 text-left text-base sm:text-xl lg:text-2xl font-normal";
+
+/** Full-row background for top 3 (gold/silver/bronze) + highlight ring. */
+function leaderboardPodiumCardClass(rank: number, highlight: boolean): string {
+  const base = "p-2 sm:p-3 rounded-lg border";
+  /** Visible gold / silver / bronze tints on dark backgrounds (not near-black). */
+  const darkGold =
+    "dark:bg-amber-600/25 dark:border-amber-400/90 dark:shadow-[inset_0_0_0_1px_rgba(251,191,36,0.35)]";
+  const darkSilver =
+    "dark:bg-slate-500/30 dark:border-slate-300/75 dark:shadow-[inset_0_0_0_1px_rgba(203,213,225,0.25)]";
+  const darkBronze =
+    "dark:bg-orange-700/30 dark:border-orange-400/85 dark:shadow-[inset_0_0_0_1px_rgba(251,146,60,0.35)]";
+  if (highlight && rank === 1) {
+    return `${base} border-2 border-[#6aaa64] bg-amber-100/90 ${darkGold}`;
+  }
+  if (highlight && rank === 2) {
+    return `${base} border-2 border-[#6aaa64] bg-slate-200/95 ${darkSilver}`;
+  }
+  if (highlight && rank === 3) {
+    return `${base} border-2 border-[#6aaa64] bg-orange-100/95 ${darkBronze}`;
+  }
+  if (highlight) {
+    return `${base} border-2 border-[#6aaa64] bg-[#6aaa64]/15 dark:bg-[#6aaa64]/25`;
+  }
+  if (rank === 1) {
+    return `${base} border-amber-300/90 bg-amber-100/90 ${darkGold}`;
+  }
+  if (rank === 2) {
+    return `${base} border-slate-300 bg-slate-200/95 ${darkSilver}`;
+  }
+  if (rank === 3) {
+    return `${base} border-orange-300/90 bg-orange-100/95 ${darkBronze}`;
+  }
+  return `${base} border-[#d3d6da] dark:border-gray-600 bg-[#f6f7f8] dark:bg-gray-700`;
+}
+
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
@@ -22,7 +64,9 @@ interface DailyEntry {
   currentStreak?: number;
 }
 
-type AllTimeTab = "alltime-wins" | "alltime-winpct" | "alltime-avgguesses" | "alltime-avgdiff";
+type AllTimeTab = "alltime-wins" | "alltime-maxstreak";
+
+type LeaderboardTab = "daily" | AllTimeTab;
 
 interface AllTimeEntry {
   rank: number;
@@ -34,13 +78,17 @@ interface AllTimeEntry {
   averageGuesses: number;
   averagePercentDiff: number;
   totalScore: number;
+  maxStreak?: number;
+  currentStreak?: number;
+  /** Result on the current puzzle date (aligned with the Today tab) */
+  todayStatus?: "win" | "loss" | "didNotPlay";
 }
 
 type LeaderboardEntry = DailyEntry | AllTimeEntry;
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
-  const [type, setType] = useState<"daily" | AllTimeTab>("daily");
+  const [type, setType] = useState<LeaderboardTab>("daily");
   const [userRank, setUserRank] = useState<number | undefined>();
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -51,7 +99,11 @@ export default function LeaderboardPage() {
     setUserRank(undefined);
 
     const apiType = type === "daily" ? "daily" : type;
-    fetch(`/api/leaderboard?type=${apiType}`)
+    const limitParam =
+      apiType === "alltime-maxstreak" || apiType === "alltime-wins"
+        ? "&limit=25"
+        : "";
+    fetch(`/api/leaderboard?type=${apiType}${limitParam}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success && json.data) {
@@ -83,50 +135,40 @@ export default function LeaderboardPage() {
 
       <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">Leaderboard</h1>
 
-      <div className="flex flex-col gap-2 sm:gap-3 mb-2 sm:mb-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
         <button
+          type="button"
           onClick={() => setType("daily")}
-          className={`self-start min-h-[36px] sm:min-h-[40px] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-            type === "daily" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
+          className={`min-h-[44px] sm:min-h-[50px] px-4 sm:px-5 py-2 sm:py-2.5 text-base sm:text-lg lg:text-xl rounded-xl font-medium [touch-action:manipulation] ${
+            type === "daily"
+              ? "bg-[#6aaa64] text-white"
+              : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
           }`}
         >
           Today
         </button>
-        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mr-0.5">All Time, filtered by:</span>
-          <button
-            onClick={() => setType("alltime-wins")}
-            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-wins" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
-            }`}
-          >
-            Wins
-          </button>
-          <button
-            onClick={() => setType("alltime-winpct")}
-            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-winpct" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
-            }`}
-          >
-            Win %
-          </button>
-          <button
-            onClick={() => setType("alltime-avgguesses")}
-            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-avgguesses" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
-            }`}
-          >
-            Avg Guesses
-          </button>
-          <button
-            onClick={() => setType("alltime-avgdiff")}
-            className={`min-h-[32px] sm:min-h-[36px] px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg font-medium [touch-action:manipulation] ${
-              type === "alltime-avgdiff" ? "bg-[#6aaa64] text-white" : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
-            }`}
-          >
-            Avg Diff
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setType("alltime-wins")}
+          className={`min-h-[44px] sm:min-h-[50px] px-4 sm:px-5 py-2 sm:py-2.5 text-base sm:text-lg lg:text-xl rounded-xl font-medium [touch-action:manipulation] ${
+            type === "alltime-wins"
+              ? "bg-[#6aaa64] text-white"
+              : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
+          }`}
+        >
+          Wins (All time)
+        </button>
+        <button
+          type="button"
+          onClick={() => setType("alltime-maxstreak")}
+          className={`min-h-[44px] sm:min-h-[50px] px-4 sm:px-5 py-2 sm:py-2.5 text-base sm:text-lg lg:text-xl rounded-xl font-medium [touch-action:manipulation] ${
+            type === "alltime-maxstreak"
+              ? "bg-[#6aaa64] text-white"
+              : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
+          }`}
+        >
+          Max Streak (All time)
+        </button>
       </div>
 
       {loading ? (
@@ -141,69 +183,158 @@ export default function LeaderboardPage() {
         </p>
       ) : (
         <div className="space-y-2 sm:space-y-3">
-          {entries.map((e) => (
-            <div
-              key={e.userId + e.rank}
-              className={`flex flex-col gap-0.5 sm:gap-1 p-2 sm:p-3 rounded-lg border border-[#d3d6da] dark:border-gray-600 ${
-                userRank && e.rank === userRank
-                  ? "bg-[#6aaa64]/15 dark:bg-[#6aaa64]/25 border-2 border-[#6aaa64]"
-                  : "bg-[#f6f7f8] dark:bg-gray-700"
-              }`}
-            >
-              <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-base lg:text-xl text-[#1a1a1b] dark:text-gray-200">
-                <span className="font-semibold shrink-0">#{e.rank}</span>
-                <span className="min-w-0 truncate font-medium">{e.username}</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-6 gap-y-0 text-xs sm:text-base lg:text-xl text-gray-600 dark:text-gray-400">
-                {type === "daily" ? (
-                  <>
-                    <span
-                      className={
-                        (e as DailyEntry).isSolved
-                          ? "text-[#6aaa64] font-bold"
-                          : "text-[#dc2626] font-bold"
-                      }
+          {entries.map((e) => {
+            const highlight =
+              userRank !== undefined && e.rank === userRank;
+            const podiumCardClass = leaderboardPodiumCardClass(e.rank, highlight);
+
+            if (type === "daily") {
+              const d = e as DailyEntry;
+              const resultColor = d.isSolved
+                ? "text-[#6aaa64]"
+                : "text-[#dc2626]";
+              const streak = d.currentStreak ?? 0;
+              return (
+                <div key={e.userId + e.rank} className={podiumCardClass}>
+                  <div className={`grid min-w-0 grid-cols-5 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
+                    <div
+                      className={`${LB_CELL} gap-1.5 sm:gap-2`}
+                      title={d.username}
                     >
-                      {(e as DailyEntry).isSolved ? "WON" : "LOSS"}
-                    </span>
-                    <span>
-                      Guesses: {(e as DailyEntry).guessesUsed}/{MAX_GUESSES}
-                    </span>
-                    <span>
-                      Time: {formatTime((e as DailyEntry).timeInSeconds)}
-                    </span>
-                    {(() => {
-                      const streak = (e as DailyEntry).currentStreak;
-                      return streak != null && streak >= 3 ? (
-                        <span className="text-[#f5793a] font-medium">
+                      <span className="shrink-0 tabular-nums">#{e.rank}</span>
+                      <span className="min-w-0 truncate font-bold">
+                        {d.username}
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span
+                        className={`min-w-0 leading-tight font-bold ${resultColor}`}
+                      >
+                        {d.isSolved ? "WON" : "LOSS"}
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Guesses:{" "}
+                        <span className="font-bold">{d.guessesUsed}</span> /{" "}
+                        {MAX_GUESSES}
+                      </span>
+                    </div>
+                    <div
+                      className={`${LB_CELL} flex-col !items-start justify-center gap-0.5`}
+                    >
+                      <span className="min-w-0 leading-tight">
+                        Time: {formatTime(d.timeInSeconds)}
+                      </span>
+                      {d.percentDiff > 0 ? (
+                        <span className="min-w-0 leading-tight">
+                          Diff: Δ{d.percentDiff.toFixed(0)}%
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className={LB_CELL}>
+                      {streak >= STREAK_FLAME_MIN ? (
+                        <span className="min-w-0 text-left text-base sm:text-xl lg:text-2xl leading-tight text-[#f5793a]">
                           🔥 {streak} days straight!
                         </span>
-                      ) : null;
-                    })()}
-                    {(e as DailyEntry).percentDiff > 0 && (
-                      <span>Difference: Δ{(e as DailyEntry).percentDiff.toFixed(0)}%</span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <span className="font-medium text-[#1a1a1b] dark:text-gray-200">
-                      Wins: {(e as AllTimeEntry).wins} / Games: {(e as AllTimeEntry).totalGames}
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            if (type === "alltime-wins") {
+              const w = e as AllTimeEntry;
+              const pct = w.winPercent ?? 0;
+              return (
+                <div key={e.userId + e.rank} className={podiumCardClass}>
+                  <div className={`grid min-w-0 grid-cols-4 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
+                    <div
+                      className={`${LB_CELL} gap-1.5 sm:gap-2`}
+                      title={w.username}
+                    >
+                      <span className="shrink-0 tabular-nums">#{e.rank}</span>
+                      <span className="min-w-0 truncate font-bold">
+                        {w.username}
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Wins: <span className="font-bold">{w.wins}</span> /{" "}
+                        {w.totalGames} games
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Win %: <span className="font-bold">{pct.toFixed(0)}</span>%
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Avg guesses:{" "}
+                        <span className="font-bold">
+                          {(w.averageGuesses ?? 0).toFixed(1)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            const a = e as AllTimeEntry;
+            const cur = a.currentStreak ?? 0;
+            const ts = a.todayStatus;
+            const todayColor =
+              ts === "win"
+                ? "text-[#6aaa64]"
+                : ts === "loss"
+                  ? "text-[#dc2626]"
+                  : "text-gray-500 dark:text-gray-400";
+            return (
+              <div key={e.userId + e.rank} className={podiumCardClass}>
+                <div className={`grid min-w-0 grid-cols-4 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
+                  <div className={`${LB_CELL} gap-1.5 sm:gap-2`} title={a.username}>
+                    <span className="shrink-0 tabular-nums">#{e.rank}</span>
+                    <span className="min-w-0 truncate font-bold">{a.username}</span>
+                  </div>
+                  <div className={LB_CELL}>
+                    <span className="min-w-0 leading-tight">
+                      Best: <span className="font-bold">{a.maxStreak ?? 0}</span>{" "}
+                      days
                     </span>
-                    <span>Win %: {((e as AllTimeEntry).winPercent ?? 0).toFixed(0)}%</span>
-                    <span>
-                      Avg guesses: {((e as AllTimeEntry).averageGuesses ?? 0).toFixed(1)}
+                  </div>
+                  <div className={LB_CELL}>
+                    <span className="min-w-0 leading-tight">
+                      Current: {cur} day{cur !== 1 ? "s" : ""}
+                      {cur >= STREAK_FLAME_MIN ? (
+                        <span className="text-[#f5793a]" aria-hidden>
+                          {" "}
+                          🔥
+                        </span>
+                      ) : null}
                     </span>
-                    <span>Avg diff: Δ{((e as AllTimeEntry).averagePercentDiff ?? 0).toFixed(0)}%</span>
-                  </>
-                )}
+                  </div>
+                  <div className={`${LB_CELL} ${todayColor}`}>
+                    <span className="min-w-0 leading-tight">
+                      Today:{" "}
+                      {ts === "win"
+                        ? "WIN"
+                        : ts === "loss"
+                          ? "LOSS"
+                          : "DID NOT PLAY"}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {userRank && (
-        <p className="mt-4 sm:mt-6 text-center text-[#6aaa64] dark:text-[#7dbb77] font-medium text-xs sm:text-base lg:text-xl">
+        <p className="mt-4 sm:mt-6 text-center text-[#6aaa64] dark:text-[#7dbb77] font-bold text-lg sm:text-2xl lg:text-3xl">
           Your rank: #{userRank}
         </p>
       )}

@@ -63,9 +63,10 @@ export default async function Home() {
               </Link>
               <Link
                 href="/leaderboard"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center gap-x-1.5 flex-wrap"
               >
-                View Leaderboard
+                <span>View Leaderboard</span>
+                <span className="text-red-700 dark:text-[#b91c1c] font-bold">(UPDATED!)</span>
               </Link>
             </>
           ) : (
@@ -84,9 +85,10 @@ export default async function Home() {
               </Link>
               <Link
                 href="/leaderboard"
-                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center"
+                className="block w-full min-h-[36px] sm:min-h-[44px] lg:min-h-[56px] py-2 sm:py-3 lg:py-4 text-sm sm:text-base lg:text-2xl px-4 sm:px-6 bg-[#D4AF37] dark:bg-[#c9a227] text-[#1a1a1b] dark:text-[#1a1a1b] font-semibold rounded-lg border border-[#B8962E] dark:border-[#a8862e] hover:bg-[#C9A227] dark:hover:bg-[#d4af37] transition-colors [touch-action:manipulation] flex items-center justify-center gap-x-1.5 flex-wrap"
               >
-                View Leaderboard
+                <span>View Leaderboard</span>
+                <span className="text-red-700 dark:text-[#b91c1c] font-bold">(UPDATED!)</span>
               </Link>
             </>
           )}
