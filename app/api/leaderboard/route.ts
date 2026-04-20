@@ -8,16 +8,86 @@ import {
   getAverageGuessesIncludingLosses,
 } from "@/lib/utils/solved-distribution";
 import { calendarDayBefore } from "@/lib/streak";
+import { firstGuessDiffFromHistory } from "@/lib/utils/percent-diff";
+
+type GuessRowBestGut = {
+  user_id: string;
+  puzzle_id: string;
+  guess_history: unknown;
+  guesses_used: number;
+  is_solved: boolean;
+};
+
+async function fetchAllGuessesForBestGut(
+  adminSupabase: ReturnType<typeof createAdminClient>
+): Promise<GuessRowBestGut[]> {
+  const pageSize = 1000;
+  let from = 0;
+  const rows: GuessRowBestGut[] = [];
+  for (;;) {
+    const { data, error } = await adminSupabase
+      .from("guesses")
+      .select("user_id, puzzle_id, guess_history, guesses_used, is_solved")
+      .range(from, from + pageSize - 1);
+    if (error) {
+      console.error("Leaderboard best gut guesses fetch error:", error);
+      break;
+    }
+    if (!data?.length) break;
+    rows.push(...(data as GuessRowBestGut[]));
+    if (data.length < pageSize) break;
+    from += pageSize;
+  }
+  return rows;
+}
+
+async function fetchPuzzleHandsMap(
+  adminSupabase: ReturnType<typeof createAdminClient>,
+  puzzleIds: string[]
+): Promise<
+  Map<
+    string,
+    Array<{ position: number; actualPercent: number }>
+  >
+> {
+  const map = new Map<
+    string,
+    Array<{ position: number; actualPercent: number }>
+  >();
+  const chunkSize = 100;
+  for (let i = 0; i < puzzleIds.length; i += chunkSize) {
+    const slice = puzzleIds.slice(i, i + chunkSize);
+    const { data, error } = await adminSupabase
+      .from("puzzles")
+      .select("id, hands")
+      .in("id", slice);
+    if (error) {
+      console.error("Leaderboard best gut puzzles fetch error:", error);
+      continue;
+    }
+    for (const p of data ?? []) {
+      map.set(
+        p.id,
+        p.hands as Array<{ position: number; actualPercent: number }>
+      );
+    }
+  }
+  return map;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const type = searchParams.get("type") || "daily";
+  const rawType = searchParams.get("type") || "daily";
+  const type =
+    rawType === "alltime-avgfirstdiff" ? "alltime-wins" : rawType;
   const requestedLimit = Math.min(
     100,
     parseInt(searchParams.get("limit") || "50", 10)
   );
   const limit =
-    type === "alltime-maxstreak" || type === "alltime-wins"
+    type === "alltime-maxstreak" ||
+    type === "alltime-wins" ||
+    type === "alltime-bestgutfeeling"
       ? Math.min(25, requestedLimit)
       : requestedLimit;
 
@@ -60,6 +130,167 @@ export async function GET(request: NextRequest) {
 
   const supabase = await createServerSupabaseClient();
   const user = (await supabase.auth.getUser()).data.user;
+
+  if (type === "alltime-bestgutfeeling") {
+    const { MAX_GUESSES: maxGuesses } = await import("@/lib/game-config");
+
+    const guessRows = await fetchAllGuessesForBestGut(adminSupabase);
+    const completed = guessRows.filter(
+      (g) =>
+        g.guesses_used > 0 &&
+        (g.is_solved || g.guesses_used >= maxGuesses)
+    );
+    const puzzleIds = [
+      ...new Set(completed.map((g) => g.puzzle_id).filter(Boolean)),
+    ];
+    const handsByPuzzle = await fetchPuzzleHandsMap(adminSupabase, puzzleIds);
+
+    const bestByUser = new Map<string, number>();
+    for (const g of completed) {
+      const hands = handsByPuzzle.get(g.puzzle_id);
+      if (!hands?.length) continue;
+      const d = firstGuessDiffFromHistory(g.guess_history, hands);
+      if (d == null || Number.isNaN(d)) continue;
+      const prev = bestByUser.get(g.user_id);
+      if (prev === undefined || d < prev) {
+        bestByUser.set(g.user_id, d);
+      }
+    }
+
+    const userIdsBest = [...bestByUser.keys()];
+    if (userIdsBest.length === 0) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          type: "alltime-bestgutfeeling" as const,
+          entries: [],
+          userRank: undefined,
+          isDemoMode: false,
+        },
+      });
+    }
+
+    const { data: statsBest, error: statsBestError } = await adminSupabase
+      .from("user_stats")
+      .select(
+        "user_id, total_games, solved_distribution, failed_games, average_percent_diff"
+      )
+      .in("user_id", userIdsBest);
+
+    if (statsBestError) {
+      console.error("Leaderboard best gut user_stats error:", statsBestError);
+    }
+
+    const statsMap = new Map(
+      (statsBest ?? []).map((s) => [s.user_id, s])
+    );
+
+    type StatRowBest = {
+      user_id: string;
+      total_games?: number;
+      solved_distribution?: Record<string, number>;
+      failed_games?: number;
+      average_percent_diff?: number;
+      bestFirstGuessDiff: number;
+    };
+
+    const merged: StatRowBest[] = userIdsBest.map((uid) => {
+      const s = statsMap.get(uid);
+      return {
+        user_id: uid,
+        total_games: s?.total_games,
+        solved_distribution: s?.solved_distribution,
+        failed_games: s?.failed_games,
+        average_percent_diff: s?.average_percent_diff,
+        bestFirstGuessDiff: bestByUser.get(uid) ?? 0,
+      };
+    });
+
+    const getWins = (s: { solved_distribution?: Record<string, number> }) =>
+      countWins(s.solved_distribution);
+    const getAvgGuesses = (
+      s: {
+        solved_distribution?: Record<string, number>;
+        failed_games?: number;
+        total_games?: number;
+      }
+    ) =>
+      getAverageGuessesIncludingLosses(
+        s.solved_distribution,
+        s.failed_games ?? 0,
+        s.total_games ?? 0,
+        maxGuesses
+      );
+    const getWinPct = (
+      s: { total_games?: number; failed_games?: number }
+    ) => {
+      const total = s.total_games ?? 0;
+      if (total === 0) return 0;
+      return ((total - (s.failed_games ?? 0)) / total) * 100;
+    };
+
+    const sortBestGut: (a: StatRowBest, b: StatRowBest) => number = (a, b) => {
+      const d = a.bestFirstGuessDiff - b.bestFirstGuessDiff;
+      if (d !== 0) return d;
+      const pctA = getWinPct(a);
+      const pctB = getWinPct(b);
+      if (pctB !== pctA) return pctB - pctA;
+      const winsA = getWins(a);
+      const winsB = getWins(b);
+      if (winsB !== winsA) return winsB - winsA;
+      return 0;
+    };
+
+    const sortedBest = [...merged].sort(sortBestGut);
+    const top = sortedBest.slice(0, limit);
+    const fullSortedBest = sortedBest;
+
+    const profileIds = top.map((s) => s.user_id);
+    const { data: profilesBest } = profileIds.length
+      ? await adminSupabase
+          .from("profiles")
+          .select("user_id, nickname, email")
+          .in("user_id", profileIds)
+      : { data: [] };
+    const profileMapBest = new Map(
+      (profilesBest ?? []).map((p) => [p.user_id, p])
+    );
+
+    const entriesBest = top.map((s, i) => {
+      const p = profileMapBest.get(s.user_id);
+      const displayName = p
+        ? p.nickname
+        : `Player ${String(s.user_id).slice(0, 8)}`;
+      return {
+        rank: i + 1,
+        userId: s.user_id,
+        username: displayName,
+        wins: getWins(s),
+        totalGames: s.total_games,
+        winPercent: getWinPct(s),
+        averageGuesses: getAvgGuesses(s),
+        averagePercentDiff: parseFloat(
+          String(s.average_percent_diff ?? 0)
+        ),
+        bestFirstGuessDiff: parseFloat(s.bestFirstGuessDiff.toFixed(2)),
+      };
+    });
+
+    const userRankBest = user
+      ? (fullSortedBest.findIndex((s) => s.user_id === user.id) + 1) ||
+        undefined
+      : undefined;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        type: "alltime-bestgutfeeling" as const,
+        entries: entriesBest,
+        userRank: userRankBest,
+        isDemoMode: false,
+      },
+    });
+  }
 
   const allTimeTypes = [
     "alltime",
@@ -304,7 +535,7 @@ export async function GET(request: NextRequest) {
   }
   const { data: puzzle } = await adminSupabase
     .from("puzzles")
-    .select("id")
+    .select("id, hands")
     .eq("puzzle_date", currentDate)
     .single();
 
@@ -324,8 +555,15 @@ export async function GET(request: NextRequest) {
 
   const { data: guesses } = await adminSupabase
     .from("guesses")
-    .select("user_id, is_solved, guesses_used, time_taken_seconds, percent_diff, submitted_at")
+    .select(
+      "user_id, is_solved, guesses_used, time_taken_seconds, percent_diff, submitted_at, guess_history"
+    )
     .eq("puzzle_id", puzzle.id);
+
+  const hands = puzzle.hands as Array<{
+    position: number;
+    actualPercent: number;
+  }>;
 
   const completed = (guesses ?? []).filter(
     (g) => g.guesses_used > 0 && (g.is_solved || g.guesses_used >= MAX_GUESSES)
@@ -345,6 +583,11 @@ export async function GET(request: NextRequest) {
   const entries = limited.map((g, i) => {
     const p = profileMap.get(g.user_id);
     const displayName = p ? p.nickname : `Player ${String(g.user_id).slice(0, 8)}`;
+    const firstGuessDiff =
+      firstGuessDiffFromHistory(
+        (g as { guess_history?: unknown }).guess_history,
+        hands
+      ) ?? 0;
     return {
       rank: i + 1,
       userId: g.user_id,
@@ -353,6 +596,7 @@ export async function GET(request: NextRequest) {
       guessesUsed: g.guesses_used,
       timeInSeconds: g.time_taken_seconds,
       percentDiff: g.percent_diff ?? 0,
+      firstGuessDiff,
       submittedAt: g.submitted_at,
       currentStreak: streakMap.get(g.user_id) ?? 0,
     };

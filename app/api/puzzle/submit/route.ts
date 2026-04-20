@@ -12,22 +12,12 @@ import {
   getAverageGuessesFromSolvedDistribution,
 } from "@/lib/utils/solved-distribution";
 import { calendarDayBefore } from "@/lib/streak";
+import {
+  computePercentDiff,
+  firstGuessDiffFromHistory,
+} from "@/lib/utils/percent-diff";
 
 type FeedbackType = "exact" | "high" | "low";
-
-/** Sum of |guessed - actual| over all hands for the final attempt */
-function computePercentDiff(
-  feedback: Array<{ position: number; percent: number }>,
-  actuals: Array<{ position: number; percent: number }>
-): number {
-  const actualMap = Object.fromEntries(
-    actuals.map((a) => [a.position, a.percent])
-  );
-  return feedback.reduce(
-    (sum, g) => sum + Math.abs(g.percent - (actualMap[g.position] ?? 0)),
-    0
-  );
-}
 
 function getFeedback(guessed: number, actual: number): FeedbackType {
   if (guessed === actual) return "exact";
@@ -364,12 +354,15 @@ export async function POST(request: NextRequest) {
   }
 
   if (isSolved || guessesUsed >= MAX_GUESSES) {
+    const firstGuessPercentDiff =
+      firstGuessDiffFromHistory(guessHistory, hands) ?? 0;
     await updateUserStats(supabase, user.id, {
       guessesUsed,
       isSolved,
       totalScore,
       puzzleDate: puzzle.puzzle_date,
       percentDiff,
+      firstGuessPercentDiff,
     });
   }
 
@@ -421,6 +414,7 @@ async function updateUserStats(
     totalScore: number;
     puzzleDate: string;
     percentDiff: number;
+    firstGuessPercentDiff: number;
   }
 ) {
   const { data: stats } = await supabase
@@ -460,6 +454,12 @@ async function updateUserStats(
       ? ((stats.average_percent_diff ?? 0) * (stats.total_games ?? 0) + params.percentDiff) /
         ((stats.total_games ?? 0) + 1)
       : params.percentDiff,
+    average_first_guess_percent_diff: stats
+      ? ((Number(stats.average_first_guess_percent_diff) || 0) *
+          (stats.total_games ?? 0) +
+          params.firstGuessPercentDiff) /
+        ((stats.total_games ?? 0) + 1)
+      : params.firstGuessPercentDiff,
     last_played_date: params.puzzleDate,
     updated_at: new Date().toISOString(),
   };

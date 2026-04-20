@@ -60,11 +60,16 @@ interface DailyEntry {
   guessesUsed: number;
   timeInSeconds: number;
   percentDiff: number;
+  /** Gut feeling (first guess): sum |guess−actual| on first attempt */
+  firstGuessDiff: number;
   submittedAt?: string;
   currentStreak?: number;
 }
 
-type AllTimeTab = "alltime-wins" | "alltime-maxstreak";
+type AllTimeTab =
+  | "alltime-wins"
+  | "alltime-bestgutfeeling"
+  | "alltime-maxstreak";
 
 type LeaderboardTab = "daily" | AllTimeTab;
 
@@ -82,6 +87,8 @@ interface AllTimeEntry {
   currentStreak?: number;
   /** Result on the current puzzle date (aligned with the Today tab) */
   todayStatus?: "win" | "loss" | "didNotPlay";
+  /** Lowest first-guess diff on any single puzzle (all-time-best tab) */
+  bestFirstGuessDiff?: number;
 }
 
 type LeaderboardEntry = DailyEntry | AllTimeEntry;
@@ -100,7 +107,9 @@ export default function LeaderboardPage() {
 
     const apiType = type === "daily" ? "daily" : type;
     const limitParam =
-      apiType === "alltime-maxstreak" || apiType === "alltime-wins"
+      apiType === "alltime-maxstreak" ||
+      apiType === "alltime-wins" ||
+      apiType === "alltime-bestgutfeeling"
         ? "&limit=25"
         : "";
     fetch(`/api/leaderboard?type=${apiType}${limitParam}`)
@@ -133,7 +142,7 @@ export default function LeaderboardPage() {
         </div>
       </header>
 
-      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-3 sm:mb-4 text-[#1a1a1b] dark:text-gray-100">Leaderboard</h1>
+      <h1 className="text-base sm:text-xl lg:text-2xl xl:text-3xl font-bold mb-2 sm:mb-3 text-[#1a1a1b] dark:text-gray-100">Leaderboard</h1>
 
       <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
         <button
@@ -160,6 +169,17 @@ export default function LeaderboardPage() {
         </button>
         <button
           type="button"
+          onClick={() => setType("alltime-bestgutfeeling")}
+          className={`min-h-[44px] sm:min-h-[50px] px-4 sm:px-5 py-2 sm:py-2.5 text-base sm:text-lg lg:text-xl rounded-xl font-medium [touch-action:manipulation] ${
+            type === "alltime-bestgutfeeling"
+              ? "bg-[#6aaa64] text-white"
+              : "bg-[#f6f7f8] dark:bg-gray-700 border border-[#d3d6da] dark:border-gray-600 text-[#1a1a1b] dark:text-gray-200"
+          }`}
+        >
+          Best Gut Feeling (All time)
+        </button>
+        <button
+          type="button"
           onClick={() => setType("alltime-maxstreak")}
           className={`min-h-[44px] sm:min-h-[50px] px-4 sm:px-5 py-2 sm:py-2.5 text-base sm:text-lg lg:text-xl rounded-xl font-medium [touch-action:manipulation] ${
             type === "alltime-maxstreak"
@@ -170,6 +190,12 @@ export default function LeaderboardPage() {
           Max Streak (All time)
         </button>
       </div>
+
+      {type === "daily" ? (
+        <p className="text-red-600 dark:text-white font-medium text-sm sm:text-base lg:text-lg mb-3 sm:mb-4 text-center w-full">
+          Gut Feeling = First Guess
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-base lg:text-xl">Loading...</p>
@@ -197,7 +223,7 @@ export default function LeaderboardPage() {
               return (
                 <div key={e.userId + e.rank} className={podiumCardClass}>
                   <div
-                    className={`grid min-w-0 grid-cols-[minmax(0,3fr)_minmax(0,1fr)_minmax(0,2fr)_minmax(0,2fr)_minmax(0,2fr)] gap-x-1 sm:gap-x-2 ${LB_INK}`}
+                    className={`grid min-w-0 grid-cols-[minmax(0,2.5fr)_minmax(0,0.85fr)_minmax(0,2fr)_minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-x-1 sm:gap-x-2 ${LB_INK}`}
                   >
                     <div
                       className={`${LB_CELL} gap-1.5 sm:gap-2`}
@@ -240,6 +266,14 @@ export default function LeaderboardPage() {
                           🔥 {streak} days straight!
                         </span>
                       ) : null}
+                    </div>
+                    <div className={`${LB_CELL} flex-col !items-start justify-center gap-0.5`}>
+                      <span className="min-w-0 leading-tight">
+                        Gut Feeling Diff:{" "}
+                        <span className="font-bold">
+                          Δ{(d.firstGuessDiff ?? 0).toFixed(0)}%
+                        </span>
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -285,52 +319,96 @@ export default function LeaderboardPage() {
               );
             }
 
-            const a = e as AllTimeEntry;
-            const cur = a.currentStreak ?? 0;
-            const ts = a.todayStatus;
-            const todayColor =
-              ts === "win"
-                ? "text-[#6aaa64]"
-                : ts === "loss"
-                  ? "text-[#dc2626]"
-                  : "text-gray-500 dark:text-gray-400";
-            return (
-              <div key={e.userId + e.rank} className={podiumCardClass}>
-                <div className={`grid min-w-0 grid-cols-4 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
-                  <div className={`${LB_CELL} gap-1.5 sm:gap-2`} title={a.username}>
-                    <span className="shrink-0 tabular-nums">#{e.rank}</span>
-                    <span className="min-w-0 truncate font-bold">{a.username}</span>
-                  </div>
-                  <div className={LB_CELL}>
-                    <span className="min-w-0 leading-tight">
-                      Best: <span className="font-bold">{a.maxStreak ?? 0}</span>{" "}
-                      days
-                    </span>
-                  </div>
-                  <div className={LB_CELL}>
-                    <span className="min-w-0 leading-tight">
-                      Current: {cur} day{cur !== 1 ? "s" : ""}
-                      {cur >= STREAK_FLAME_MIN ? (
-                        <span className="text-[#f5793a]" aria-hidden>
-                          {" "}
-                          🔥
-                        </span>
-                      ) : null}
-                    </span>
-                  </div>
-                  <div className={`${LB_CELL} ${todayColor}`}>
-                    <span className="min-w-0 leading-tight">
-                      Today:{" "}
-                      {ts === "win"
-                        ? "WIN"
-                        : ts === "loss"
-                          ? "LOSS"
-                          : "DID NOT PLAY"}
-                    </span>
+            if (type === "alltime-bestgutfeeling") {
+              const w = e as AllTimeEntry;
+              const pct = w.winPercent ?? 0;
+              const bg = w.bestFirstGuessDiff ?? 0;
+              return (
+                <div key={e.userId + e.rank} className={podiumCardClass}>
+                  <div
+                    className={`grid min-w-0 grid-cols-[minmax(0,2.5fr)_minmax(0,3fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-x-1 sm:gap-x-2 ${LB_INK}`}
+                  >
+                    <div
+                      className={`${LB_CELL} gap-1.5 sm:gap-2`}
+                      title={w.username}
+                    >
+                      <span className="shrink-0 tabular-nums">#{e.rank}</span>
+                      <span className="min-w-0 truncate font-bold">
+                        {w.username}
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Best Gut Feeling:{" "}
+                        <span className="font-bold">Δ{bg.toFixed(1)}%</span>
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Win %: <span className="font-bold">{pct.toFixed(0)}</span>%
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Wins: <span className="font-bold">{w.wins}</span> /{" "}
+                        {w.totalGames}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
+              );
+            }
+
+            if (type === "alltime-maxstreak") {
+              const a = e as AllTimeEntry;
+              const cur = a.currentStreak ?? 0;
+              const ts = a.todayStatus;
+              const todayColor =
+                ts === "win"
+                  ? "text-[#6aaa64]"
+                  : ts === "loss"
+                    ? "text-[#dc2626]"
+                    : "text-gray-500 dark:text-gray-400";
+              return (
+                <div key={e.userId + e.rank} className={podiumCardClass}>
+                  <div className={`grid min-w-0 grid-cols-4 gap-x-1 sm:gap-x-2 ${LB_INK}`}>
+                    <div className={`${LB_CELL} gap-1.5 sm:gap-2`} title={a.username}>
+                      <span className="shrink-0 tabular-nums">#{e.rank}</span>
+                      <span className="min-w-0 truncate font-bold">{a.username}</span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Best: <span className="font-bold">{a.maxStreak ?? 0}</span>{" "}
+                        days
+                      </span>
+                    </div>
+                    <div className={LB_CELL}>
+                      <span className="min-w-0 leading-tight">
+                        Current: {cur} day{cur !== 1 ? "s" : ""}
+                        {cur >= STREAK_FLAME_MIN ? (
+                          <span className="text-[#f5793a]" aria-hidden>
+                            {" "}
+                            🔥
+                          </span>
+                        ) : null}
+                      </span>
+                    </div>
+                    <div className={`${LB_CELL} ${todayColor}`}>
+                      <span className="min-w-0 leading-tight">
+                        Today:{" "}
+                        {ts === "win"
+                          ? "WIN"
+                          : ts === "loss"
+                            ? "LOSS"
+                            : "DID NOT PLAY"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return null;
           })}
         </div>
       )}
