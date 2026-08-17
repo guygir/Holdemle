@@ -111,3 +111,4 @@ CI verifies the sync; if README is out of sync, the build fails.
 ## Documentation
 
 See `DEPLOYMENT_CHECKLIST.md` for the full deployment guide (Supabase → GitHub → Vercel).
+
