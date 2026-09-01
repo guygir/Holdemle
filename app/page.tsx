@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
+import HonorableMentions from "@/components/HonorableMentions";
 import SuggestionBox from "@/components/SuggestionBox";
 import PollWidget from "@/components/PollWidget";
 import { getPuzzleTypeDistribution } from "@/lib/puzzle-generation";
@@ -124,6 +125,8 @@ export default async function Home() {
           </div>
           {/* Community Polls */}
           <PollWidget puzzleTypeDistribution={getPuzzleTypeDistribution()} />
+
+          <HonorableMentions />
           
           {/* Daily Players Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
