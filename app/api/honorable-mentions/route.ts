@@ -85,7 +85,37 @@ async function fetchProductionFirstGuessMentions(): Promise<HonorableMentionsPay
   }
 }
 
+function hasAdminCredentials(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return Boolean(url && !url.includes("placeholder") && key);
+}
+
 export async function GET() {
+  // Prefer the real database whenever service-role creds exist, even if
+  // NEXT_PUBLIC_USE_DEMO_PUZZLE=true (common in local .env.local).
+  if (hasAdminCredentials()) {
+    try {
+      const admin = createAdminClient();
+      const data = await fetchHonorableMentions(admin);
+      return NextResponse.json(
+        { success: true, data: { ...data, isDemoMode: false } },
+        {
+          headers: {
+            "Cache-Control": "no-store, max-age=0",
+            Pragma: "no-cache",
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Honorable mentions error:", err);
+      return NextResponse.json(
+        { success: false, error: "Failed to fetch honorable mentions" },
+        { status: 500 }
+      );
+    }
+  }
+
   const useDemo = getUseDemo();
   if (useDemo === "fail") {
     return NextResponse.json(
@@ -93,31 +123,10 @@ export async function GET() {
       { status: 503 }
     );
   }
-  if (useDemo) {
-    const data = await fetchProductionFirstGuessMentions();
-    return NextResponse.json({
-      success: true,
-      data: { ...data, isDemoMode: true },
-    });
-  }
 
-  try {
-    const admin = createAdminClient();
-    const data = await fetchHonorableMentions(admin);
-    return NextResponse.json(
-      { success: true, data: { ...data, isDemoMode: false } },
-      {
-        headers: {
-          "Cache-Control": "no-store, max-age=0",
-          Pragma: "no-cache",
-        },
-      }
-    );
-  } catch (err) {
-    console.error("Honorable mentions error:", err);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch honorable mentions" },
-      { status: 500 }
-    );
-  }
+  const data = await fetchProductionFirstGuessMentions();
+  return NextResponse.json({
+    success: true,
+    data: { ...data, isDemoMode: true },
+  });
 }
