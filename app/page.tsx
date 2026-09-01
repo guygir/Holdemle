@@ -6,18 +6,29 @@ import HonorableMentions from "@/components/HonorableMentions";
 import SuggestionBox from "@/components/SuggestionBox";
 import PollWidget from "@/components/PollWidget";
 import { getPuzzleTypeDistribution } from "@/lib/puzzle-generation";
+import { getUseDemo } from "@/lib/demo-mode";
 
 export default async function Home() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user: { id: string; user_metadata?: { nickname?: string }; email?: string } | null = null;
   let nickname = "";
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("nickname")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    nickname = profile?.nickname ?? user.user_metadata?.nickname ?? user.email?.split("@")[0] ?? "";
+  const useDemo = getUseDemo();
+  if (useDemo !== true && useDemo !== "fail") {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nickname")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        nickname = profile?.nickname ?? user.user_metadata?.nickname ?? user.email?.split("@")[0] ?? "";
+      }
+    } catch {
+      user = null;
+      nickname = "";
+    }
   }
 
   return (
