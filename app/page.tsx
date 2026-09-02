@@ -2,21 +2,33 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import versionData from "@/lib/version.json";
 import DailyPlaysChart from "@/components/DailyPlaysChart";
+import HonorableMentions from "@/components/HonorableMentions";
 import SuggestionBox from "@/components/SuggestionBox";
 import PollWidget from "@/components/PollWidget";
 import { getPuzzleTypeDistribution } from "@/lib/puzzle-generation";
+import { getUseDemo } from "@/lib/demo-mode";
 
 export default async function Home() {
-  const supabase = await createServerSupabaseClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user: { id: string; user_metadata?: { nickname?: string }; email?: string } | null = null;
   let nickname = "";
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("nickname")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    nickname = profile?.nickname ?? user.user_metadata?.nickname ?? user.email?.split("@")[0] ?? "";
+  const useDemo = getUseDemo();
+  if (useDemo !== true && useDemo !== "fail") {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("nickname")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        nickname = profile?.nickname ?? user.user_metadata?.nickname ?? user.email?.split("@")[0] ?? "";
+      }
+    } catch {
+      user = null;
+      nickname = "";
+    }
   }
 
   return (
@@ -124,6 +136,8 @@ export default async function Home() {
           </div>
           {/* Community Polls */}
           <PollWidget puzzleTypeDistribution={getPuzzleTypeDistribution()} />
+
+          <HonorableMentions />
           
           {/* Daily Players Chart */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 border-2 border-[#d3d6da] dark:border-gray-600">
